@@ -251,6 +251,11 @@
   .footnote{ font-size:11.5px; color:var(--muted); line-height:1.5; }
 
   .actions{ display:flex; flex-direction:column; gap:8px; padding:0 20px 20px; }
+  .email-routes{ display:flex; flex-direction:column; gap:8px; }
+  /* On Windows a mailto: handoff often lands on a browser with no mail service
+     registered and dies, so Gmail leads there. Everywhere else the device's own
+     mail app is the dependable one. Both stay visible either way. */
+  .email-routes.gmail-first #btnGmail{ order:-1; }
   button.btn, a.btn{
     font:inherit; font-size:13.5px; font-weight:600; text-align:center; text-decoration:none;
     border-radius:9px; padding:11px 14px; cursor:pointer; border:1.5px solid transparent;
@@ -487,13 +492,17 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.75 13.5L3 21l4.6-1.21A9 9 0 1 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 9.3c0-.4.3-.8.7-.8h.7c.3 0 .6.2.7.5l.5 1.3c.1.3 0 .6-.2.8l-.5.5c.4.9 1.1 1.6 2 2l.5-.5c.2-.2.5-.3.8-.2l1.3.5c.3.1.5.4.5.7v.7c0 .4-.4.7-.8.7-3 0-5.7-2.7-5.7-5.7z" fill="currentColor"/></svg>
             Send by WhatsApp
           </a>
-          <a class="btn btn-secondary is-disabled" id="btnEmail" role="button" rel="noopener">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            Send by email
-          </a>
-          <p class="fallback-hint">
-            No email app on this device? <a class="linklike is-disabled" id="btnGmail" target="_blank" rel="noopener">Open Gmail instead</a> — you'll need to be signed in to Google.
-          </p>
+          <div class="email-routes" id="emailRoutes">
+            <a class="btn btn-secondary is-disabled" id="btnEmail" role="button" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Open my email app
+            </a>
+            <a class="btn btn-secondary is-disabled" id="btnGmail" role="button" target="_blank" rel="noopener">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 6l8 7 8-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Open Gmail
+            </a>
+          </div>
+          <p class="fallback-hint">Both send the same message — pick whichever email you actually use. Gmail needs you signed in to Google.</p>
           <p class="fallback-hint" id="lengthWarning" hidden>
             Your notes are too long to send through a link. <button type="button" class="linklike" id="btnLengthCopy">Copy the details</button> and paste them into a message instead — nothing gets cut off that way.
           </p>
@@ -821,6 +830,11 @@
   // the device, and Gmail's web compose needs an active Google session (an incognito
   // window or a non-Gmail user gets bounced to a marketing page, losing the message).
   // So both are offered, labelled, and the client picks the one they actually have.
+  // Only the order changes: Windows is where a mailto: most often has no handler
+  // behind it, while iPhone, Mac and Android ship with one configured.
+  if(/Windows|Win32|Win64/i.test(navigator.userAgent)){
+    document.getElementById('emailRoutes').classList.add('gmail-first');
+  }
 
   // A mailto: handler truncates past roughly 2048 chars; an https URL carries far more.
   const MAILTO_MAX = 1900;
