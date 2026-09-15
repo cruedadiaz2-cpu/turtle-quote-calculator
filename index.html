@@ -240,10 +240,10 @@
   .price-line .plabel{ font-size:13px; color:var(--muted); line-height:1.4; }
   .price-line .pval{ font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
   /* Recap values are words, not figures: let them wrap and sit beside their label. */
+  .price-line.recap-row{ align-items:start; gap:16px; }
   .price-line .pval.recap{
     font-size:13.5px; white-space:normal; text-align:right; line-height:1.45; min-width:0;
   }
-  .price-line:has(.recap){ align-items:start; gap:16px; }
   .price-line.total .plabel{ font-size:13px; font-weight:600; color:var(--charcoal); }
   .price-line.total .pval{ font-size:26px; color:var(--forest-dark); }
   hr.rule{ border:none; border-top:1px solid var(--border); margin:0; }
@@ -691,7 +691,7 @@
   function renderRecap(headline, rows, footnote){
     document.getElementById('sumHeadline').textContent = headline;
     let html = rows.map(r =>
-      `<div class="price-line"><span class="plabel">${r.label}</span><span class="pval recap">${r.value}</span></div>`
+      `<div class="price-line recap-row"><span class="plabel">${r.label}</span><span class="pval recap">${r.value}</span></div>`
     ).join('');
     html += `<hr class="rule">`;
     html += `<div class="footnote">${footnote}</div>`;
@@ -814,21 +814,35 @@
   const WHATSAPP_NUMBER = '19088805716';
   const TURTLE_EMAIL = 'managturtlecs@gmail.com';
 
-  // Both send paths are plain https links on purpose: a mailto: handoff dies on
-  // any device without a mail handler wired up, and it fails as a dead-end error
-  // page rather than as nothing happening.
+  // Phones nearly always have a mail app registered, so mailto: opens the Gmail app
+  // on Android and Mail on iPhone with the message already filled in. Desktops are
+  // the opposite case: a machine whose mailto: points at a browser with no web mail
+  // registered lands on a dead-end error page, so those get Gmail's web compose.
+  // iPadOS reports itself as a Mac, hence the touch-point check.
+  const UA = navigator.userAgent;
+  const IS_IOS = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
+  const IS_MOBILE = IS_IOS || /Android/i.test(UA);
+
+  // A mailto: handler truncates past roughly 2048 chars; an https URL carries far more.
+  const MAILTO_MAX = 1900;
   const URL_MAX = 7000;
 
   function buildWhatsappUrl(){
     return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(buildPlainTextSummary());
   }
 
-  function buildGmailUrl(){
+  function buildEmailUrl(){
     const subject = 'Quote request — ' + document.getElementById('cName').value.trim();
+    const body = buildPlainTextSummary();
+    if(IS_MOBILE){
+      return 'mailto:' + TURTLE_EMAIL
+        + '?subject=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(body);
+    }
     return 'https://mail.google.com/mail/?view=cm&fs=1'
       + '&to=' + encodeURIComponent(TURTLE_EMAIL)
       + '&su=' + encodeURIComponent(subject)
-      + '&body=' + encodeURIComponent(buildPlainTextSummary());
+      + '&body=' + encodeURIComponent(body);
   }
 
   function updateActionState(){
@@ -839,14 +853,20 @@
     document.getElementById('btnCopy').disabled = !ok;
 
     const waUrl = ok ? buildWhatsappUrl() : '';
-    const gmailUrl = ok ? buildGmailUrl() : '';
-    const sendable = ok && waUrl.length <= URL_MAX && gmailUrl.length <= URL_MAX;
+    const emailUrl = ok ? buildEmailUrl() : '';
+    // Judged separately: if one path is too long to carry the notes, the other may
+    // still work, and disabling both would strand the client for no reason.
+    const waOk = ok && waUrl.length <= URL_MAX;
+    const emailOk = ok && emailUrl.length <= (IS_MOBILE ? MAILTO_MAX : URL_MAX);
 
-    [[waLink, waUrl], [emailLink, gmailUrl]].forEach(([link, url])=>{
-      if(sendable){ link.href = url; } else { link.removeAttribute('href'); }
-      link.classList.toggle('is-disabled', !sendable);
+    [[waLink, waUrl, waOk], [emailLink, emailUrl, emailOk]].forEach(([link, url, live])=>{
+      if(live){ link.href = url; } else { link.removeAttribute('href'); }
+      link.classList.toggle('is-disabled', !live);
     });
-    lengthWarning.hidden = !(ok && !sendable);
+    // A mailto: opened in a new tab leaves an empty one behind once the mail app takes over.
+    if(IS_MOBILE){ emailLink.removeAttribute('target'); } else { emailLink.target = '_blank'; }
+
+    lengthWarning.hidden = !(ok && !(waOk && emailOk));
   }
 
   async function copyDetails(){
