@@ -541,6 +541,13 @@
     {key:'code', label:'Door code'},
     {key:'coordinate', label:"We'll coordinate by phone"},
   ];
+  const BUSINESS_ACCESS = [
+    {key:'staff', label:'Staff will be on site'},
+    {key:'key', label:'Key or lockbox'},
+    {key:'alarm', label:'Door and alarm code', sub:'for after-hours cleaning'},
+    {key:'building', label:'Building manager or front desk'},
+    {key:'coordinate', label:"We'll coordinate by phone"},
+  ];
   const PETS = [
     {key:'dog', label:'Dog(s)'},
     {key:'cat', label:'Cat(s)'},
@@ -724,8 +731,12 @@
     blockCom.style.display = svc==='commercial' ? '' : 'none';
 
     if(svc !== lastSvcType){
-      document.getElementById('petsSection').style.display = svc==='commercial' ? 'none' : '';
-      checkCards(document.getElementById('priorityGrid'), svc==='commercial' ? BUSINESS_PRIORITIES : PRIORITIES);
+      const isBusiness = svc === 'commercial';
+      document.getElementById('petsSection').style.display = isBusiness ? 'none' : '';
+      checkCards(document.getElementById('priorityGrid'), isBusiness ? BUSINESS_PRIORITIES : PRIORITIES);
+      radioCards(document.getElementById('accessGroup'), 'access',
+        isBusiness ? BUSINESS_ACCESS : ACCESS,
+        isBusiness ? 'staff' : 'home');
       lastSvcType = svc;
     }
 
@@ -775,7 +786,8 @@
     }
     lines.push('');
     lines.push('HOW I LIKE IT DONE');
-    const access = ACCESS.find(a=>a.key===selectedRadio('access'));
+    const accessList = svc==='commercial' ? BUSINESS_ACCESS : ACCESS;
+    const access = accessList.find(a=>a.key===selectedRadio('access'));
     lines.push('Getting in: ' + (access ? access.label : '—'));
     if(svc==='residential'){
       const pets = checkedKeys(document.getElementById('petsGrid')).map(k=>PETS.find(p=>p.key===k).label);
