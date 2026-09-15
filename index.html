@@ -255,7 +255,7 @@
   .btn-primary:hover{ background:var(--forest-dark); }
   .btn-secondary{ background:transparent; border-color:var(--border-strong); color:var(--charcoal); }
   .btn-secondary:hover{ border-color:var(--forest); color:var(--forest-dark); }
-  .btn[disabled]{ opacity:.5; cursor:not-allowed; }
+  .btn[disabled], .btn.is-disabled{ opacity:.5; cursor:not-allowed; pointer-events:none; }
   .btn:focus-visible{ outline:2px solid var(--forest); outline-offset:2px; }
   .copy-ok{ font-size:12px; color:var(--forest-dark); text-align:center; height:14px; }
   .fallback-hint{
@@ -478,10 +478,13 @@
         <div class="summary-body" id="sumBody"><!-- JS --></div>
         <hr class="rule">
         <div class="actions">
-          <button class="btn btn-primary" id="btnEmail" type="button">
+          <a class="btn btn-primary is-disabled" id="btnEmail" role="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             Send
-          </button>
+          </a>
+          <p class="fallback-hint" id="lengthWarning" hidden>
+            Your notes are longer than an email link can carry. <button type="button" class="linklike" id="btnLengthCopy">Copy the details</button> and paste them into an email or text instead — nothing gets cut off that way.
+          </p>
           <p class="fallback-hint" id="emailFallbackHint" hidden>
             Didn't your email app open? <button type="button" class="linklike" id="btnFallbackCopy">Copy the details</button> instead and text or paste them to us.
           </p>
@@ -800,10 +803,31 @@
     return lines.join('\n');
   }
 
+  // Windows' mailto handler truncates past ~2048 chars, and does it silently.
+  const MAILTO_MAX = 1900;
+
+  function buildMailtoUrl(){
+    const body = buildPlainTextSummary();
+    const subject = 'Quote request — ' + document.getElementById('cName').value.trim();
+    return 'mailto:managturtlecs@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+
   function updateActionState(){
     const ok = document.getElementById('cName').value.trim() && document.getElementById('cPhone').value.trim();
-    document.getElementById('btnEmail').disabled = !ok;
+    const sendLink = document.getElementById('btnEmail');
+    const lengthWarning = document.getElementById('lengthWarning');
     document.getElementById('btnCopy').disabled = !ok;
+
+    const url = ok ? buildMailtoUrl() : '';
+    const sendable = ok && url.length <= MAILTO_MAX;
+
+    if(sendable){
+      sendLink.href = url;
+    } else {
+      sendLink.removeAttribute('href');
+    }
+    sendLink.classList.toggle('is-disabled', !sendable);
+    lengthWarning.hidden = !(ok && !sendable);
   }
 
   async function copyDetails(){
@@ -821,9 +845,7 @@
   let fallbackHideTimer = null;
 
   document.getElementById('btnEmail').addEventListener('click', function(){
-    const body = buildPlainTextSummary();
-    const subject = 'Quote request — ' + document.getElementById('cName').value.trim();
-    window.open('mailto:managturtlecs@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body), '_blank');
+    if(!this.getAttribute('href')) return;
 
     const hint = document.getElementById('emailFallbackHint');
     clearTimeout(fallbackHideTimer);
@@ -832,6 +854,8 @@
   });
 
   document.getElementById('btnCopy').addEventListener('click', copyDetails);
+
+  document.getElementById('btnLengthCopy').addEventListener('click', copyDetails);
 
   document.getElementById('btnFallbackCopy').addEventListener('click', function(){
     copyDetails();
