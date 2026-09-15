@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turtle Cleaning Services</title>
+<meta name="description" content="Home and small business cleaning in North NJ and New York City. Message us on WhatsApp or get an instant estimate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --forest:#3D5E33;
+    --forest-dark:#2E4726;
+    --sage:#DDE8C0;
+    --sage-tint:#F1F5E7;
+    --charcoal:#323232;
+    --bg:#F8F8F2;
+    --surface:#FFFFFF;
+    --border:#E1E1D6;
+    --border-strong:#C7CCB8;
+    --muted:#6B6F62;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --forest:#8FC46E;
+      --forest-dark:#6FA352;
+      --sage:#3A4530;
+      --sage-tint:#232A1C;
+      --charcoal:#ECEFE4;
+      --bg:#181D14;
+      --surface:#20261A;
+      --border:#333B27;
+      --border-strong:#454F35;
+      --muted:#9AA189;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --forest:#8FC46E;
+    --forest-dark:#6FA352;
+    --sage:#3A4530;
+    --sage-tint:#232A1C;
+    --charcoal:#ECEFE4;
+    --bg:#181D14;
+    --surface:#20261A;
+    --border:#333B27;
+    --border-strong:#454F35;
+    --muted:#9AA189;
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--charcoal);
+    font-family:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:0 20px;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .card{
+    width:100%;
+    max-width:400px;
+    padding-block:44px 32px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    text-align:center;
+  }
+  .mark{ display:block; width:76px; height:auto; }
+  .mark-white{ display:none; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .mark-color{ display:none; }
+    :root:not([data-theme="light"]) .mark-white{ display:block; }
+  }
+  :root[data-theme="dark"] .mark-color{ display:none; }
+  :root[data-theme="dark"] .mark-white{ display:block; }
+
+  h1{
+    margin:0;
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    color:var(--forest-dark);
+    line-height:1.3;
+  }
+  .place{
+    font-size:11px; font-weight:500; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); margin-top:5px;
+  }
+  .tagline{
+    display:inline-flex; align-items:center; gap:7px;
+    background:var(--forest); color:#fff; font-weight:600; font-size:13px;
+    padding:7px 15px; border-radius:999px;
+  }
+  .links{ width:100%; display:flex; flex-direction:column; gap:11px; }
+  a.btn{
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    font:inherit; font-size:15px; font-weight:600; text-decoration:none;
+    padding:15px 18px; border-radius:11px;
+    border:1.5px solid transparent; transition:.15s;
+  }
+  a.btn svg{ flex:none; }
+  .btn-wa{ background:var(--forest); color:#fff; }
+  .btn-wa:hover{ background:var(--forest-dark); }
+  .btn-quote{ background:var(--sage-tint); border-color:var(--forest); color:var(--forest-dark); }
+  .btn-quote:hover{ background:var(--sage); }
+  .btn-plain{ background:transparent; border-color:var(--border-strong); color:var(--charcoal); }
+  .btn-plain:hover{ border-color:var(--forest); color:var(--forest-dark); }
+  .btn:focus-visible{ outline:2px solid var(--forest); outline-offset:2px; }
+
+  .facts{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:5px 14px;
+    font-size:12px; color:var(--muted); margin:0; padding:0; list-style:none;
+  }
+  footer{ font-size:11px; color:var(--muted); line-height:1.6; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <img class="mark mark-color" src="../turtle-mark-color.png" width="76" height="113" alt="Turtle Cleaning Services">
+    <img class="mark mark-white" src="../turtle-mark-white.png" width="76" height="113" alt="" aria-hidden="true">
+
+    <div>
+      <h1>Turtle Cleaning Services</h1>
+      <div class="place">North NJ &amp; New York City</div>
+    </div>
+
+    <span class="tagline">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12l5 5L20 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      We don't cut corners.
+    </span>
+
+    <div class="links">
+      <a class="btn btn-wa" href="https://wa.me/19088805716?text=Hi%20Turtle%2C%20I%27d%20like%20a%20cleaning%20quote." target="_blank" rel="noopener">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.75 13.5L3 21l4.6-1.21A9 9 0 1 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 9.3c0-.4.3-.8.7-.8h.7c.3 0 .6.2.7.5l.5 1.3c.1.3 0 .6-.2.8l-.5.5c.4.9 1.1 1.6 2 2l.5-.5c.2-.2.5-.3.8-.2l1.3.5c.3.1.5.4.5.7v.7c0 .4-.4.7-.8.7-3 0-5.7-2.7-5.7-5.7z" fill="currentColor"/></svg>
+        Message us on WhatsApp
+      </a>
+
+      <a class="btn btn-quote" href="../">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 4h10a1 1 0 0 1 1 1v15l-6-3-6 3V5a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 9h6M9 12.5h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Get your cleaning estimate
+      </a>
+
+      <a class="btn btn-plain" href="tel:+19088805716">Call or text (908) 880-5716</a>
+    </div>
+
+    <ul class="facts">
+      <li>Homes &amp; small offices</li>
+      <li>Since 2023</li>
+      <li>Weekend appointments</li>
+      <li>The owner is on every job</li>
+    </ul>
+
+    <footer>Turtle Cleaning Services LLC · Locally owned, based in Union County, NJ</footer>
+  </main>
+</body>
+</html>
