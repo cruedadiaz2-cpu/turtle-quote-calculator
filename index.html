@@ -478,15 +478,16 @@
         <div class="summary-body" id="sumBody"><!-- JS --></div>
         <hr class="rule">
         <div class="actions">
-          <a class="btn btn-primary is-disabled" id="btnEmail" role="button">
+          <a class="btn btn-primary is-disabled" id="btnWhatsapp" role="button" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.75 13.5L3 21l4.6-1.21A9 9 0 1 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 9.3c0-.4.3-.8.7-.8h.7c.3 0 .6.2.7.5l.5 1.3c.1.3 0 .6-.2.8l-.5.5c.4.9 1.1 1.6 2 2l.5-.5c.2-.2.5-.3.8-.2l1.3.5c.3.1.5.4.5.7v.7c0 .4-.4.7-.8.7-3 0-5.7-2.7-5.7-5.7z" fill="currentColor"/></svg>
+            Send by WhatsApp
+          </a>
+          <a class="btn btn-secondary is-disabled" id="btnEmail" role="button" target="_blank" rel="noopener">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            Send
+            Send by email
           </a>
           <p class="fallback-hint" id="lengthWarning" hidden>
-            Your notes are longer than an email link can carry. <button type="button" class="linklike" id="btnLengthCopy">Copy the details</button> and paste them into an email or text instead — nothing gets cut off that way.
-          </p>
-          <p class="fallback-hint" id="emailFallbackHint" hidden>
-            Didn't your email app open? <button type="button" class="linklike" id="btnFallbackCopy">Copy the details</button> instead and text or paste them to us.
+            Your notes are too long to send through a link. <button type="button" class="linklike" id="btnLengthCopy">Copy the details</button> and paste them into a message instead — nothing gets cut off that way.
           </p>
           <button class="btn btn-secondary" id="btnCopy" type="button">Copy details</button>
           <div class="copy-ok" id="copyOk"></div>
@@ -803,30 +804,41 @@
     return lines.join('\n');
   }
 
-  // Windows' mailto handler truncates past ~2048 chars, and does it silently.
-  const MAILTO_MAX = 1900;
+  const WHATSAPP_NUMBER = '19088805716';
+  const TURTLE_EMAIL = 'managturtlecs@gmail.com';
 
-  function buildMailtoUrl(){
-    const body = buildPlainTextSummary();
+  // Both send paths are plain https links on purpose: a mailto: handoff dies on
+  // any device without a mail handler wired up, and it fails as a dead-end error
+  // page rather than as nothing happening.
+  const URL_MAX = 7000;
+
+  function buildWhatsappUrl(){
+    return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(buildPlainTextSummary());
+  }
+
+  function buildGmailUrl(){
     const subject = 'Quote request — ' + document.getElementById('cName').value.trim();
-    return 'mailto:managturtlecs@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    return 'https://mail.google.com/mail/?view=cm&fs=1'
+      + '&to=' + encodeURIComponent(TURTLE_EMAIL)
+      + '&su=' + encodeURIComponent(subject)
+      + '&body=' + encodeURIComponent(buildPlainTextSummary());
   }
 
   function updateActionState(){
     const ok = document.getElementById('cName').value.trim() && document.getElementById('cPhone').value.trim();
-    const sendLink = document.getElementById('btnEmail');
+    const waLink = document.getElementById('btnWhatsapp');
+    const emailLink = document.getElementById('btnEmail');
     const lengthWarning = document.getElementById('lengthWarning');
     document.getElementById('btnCopy').disabled = !ok;
 
-    const url = ok ? buildMailtoUrl() : '';
-    const sendable = ok && url.length <= MAILTO_MAX;
+    const waUrl = ok ? buildWhatsappUrl() : '';
+    const gmailUrl = ok ? buildGmailUrl() : '';
+    const sendable = ok && waUrl.length <= URL_MAX && gmailUrl.length <= URL_MAX;
 
-    if(sendable){
-      sendLink.href = url;
-    } else {
-      sendLink.removeAttribute('href');
-    }
-    sendLink.classList.toggle('is-disabled', !sendable);
+    [[waLink, waUrl], [emailLink, gmailUrl]].forEach(([link, url])=>{
+      if(sendable){ link.href = url; } else { link.removeAttribute('href'); }
+      link.classList.toggle('is-disabled', !sendable);
+    });
     lengthWarning.hidden = !(ok && !sendable);
   }
 
@@ -842,26 +854,8 @@
     setTimeout(()=>{ note.textContent=''; }, 4000);
   }
 
-  let fallbackHideTimer = null;
-
-  document.getElementById('btnEmail').addEventListener('click', function(){
-    if(!this.getAttribute('href')) return;
-
-    const hint = document.getElementById('emailFallbackHint');
-    clearTimeout(fallbackHideTimer);
-    setTimeout(()=>{ hint.hidden = false; }, 1200);
-    fallbackHideTimer = setTimeout(()=>{ hint.hidden = true; }, 16000);
-  });
-
   document.getElementById('btnCopy').addEventListener('click', copyDetails);
-
   document.getElementById('btnLengthCopy').addEventListener('click', copyDetails);
-
-  document.getElementById('btnFallbackCopy').addEventListener('click', function(){
-    copyDetails();
-    document.getElementById('emailFallbackHint').hidden = true;
-    clearTimeout(fallbackHideTimer);
-  });
 
   refresh();
 })();
