@@ -239,6 +239,11 @@
   .price-line{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
   .price-line .plabel{ font-size:13px; color:var(--muted); line-height:1.4; }
   .price-line .pval{ font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  /* Recap values are words, not figures: let them wrap and sit beside their label. */
+  .price-line .pval.recap{
+    font-size:13.5px; white-space:normal; text-align:right; line-height:1.45; min-width:0;
+  }
+  .price-line:has(.recap){ align-items:start; gap:16px; }
   .price-line.total .plabel{ font-size:13px; font-weight:600; color:var(--charcoal); }
   .price-line.total .pval{ font-size:26px; color:var(--forest-dark); }
   hr.rule{ border:none; border-top:1px solid var(--border); margin:0; }
@@ -288,8 +293,8 @@
       <div class="wordmark">Turtle Cleaning Services<span>North NJ &amp; New York City</span></div>
     </div>
 
-    <h1 class="title">Get your cleaning estimate</h1>
-    <p class="lede">Answer a few questions about your home (or your business) and how you like things done. You'll see a real price on the spot — we confirm it once we see the space.</p>
+    <h1 class="title">Request your cleaning quote</h1>
+    <p class="lede">Tell us about your home (or your business) and how you like things done. Send it over and we'll come back with your quote, usually within one business day.</p>
     <span class="tagline-chip">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       We don't cut corners.
@@ -324,7 +329,7 @@
       <!-- STEP 2: RESIDENTIAL -->
       <section class="card" id="block-residential">
         <div class="step-head"><span class="step-num">2</span><h2>Your home</h2></div>
-        <p class="step-sub">Pick the closest match — we'll fine-tune the price at your walkthrough if the space is unusual.</p>
+        <p class="step-sub">Pick the closest match — if your place is unusual, tell us in the notes at the end.</p>
 
         <div class="optgrid" role="radiogroup" aria-label="Home size" id="homeSizeGroup">
           <!-- filled by JS -->
@@ -339,7 +344,7 @@
         <div class="check-row">
           <input type="checkbox" id="needsExtra">
           <label for="needsExtra">It's been a while since a professional clean — the house needs extra attention
-            <span class="sub">We'll price this as a deep clean instead of a standard one, so there's no surprise at the door.</span>
+            <span class="sub">We'll quote it as a deep clean instead of a standard one, so there's no surprise at the door.</span>
           </label>
         </div>
 
@@ -472,7 +477,7 @@
     <div class="summary-col">
       <div class="summary">
         <div class="summary-head">
-          <div class="eyebrow">Your estimate</div>
+          <div class="eyebrow">Your request</div>
           <div class="headline" id="sumHeadline">Studio / 1 bed, 1 bath — one-time</div>
         </div>
         <div class="summary-body" id="sumBody"><!-- JS --></div>
@@ -499,19 +504,21 @@
 
   <footer class="page-footer">
     <span>Turtle Cleaning Services LLC · Locally owned, based in Union County, NJ · Serving North NJ &amp; NYC · Since 2023</span>
-    <span>Estimates shown are for homes in normal condition and confirmed after we see the space.</span>
+    <span>We quote every job individually, based on the size and condition of the space.</span>
   </footer>
 </div>
 
 <script>
 (function(){
+  // No rates live in this page on purpose: quotes are sent by reply, and anything
+  // published here would be readable in the page source.
   const HOMES = [
-    {key:'studio1', label:'Studio / 1BR, 1BA', sqft:600, standard:175, deep:280, move:315, weekly:140, biweekly:150, monthly:165},
-    {key:'2b1b',    label:'2BR, 1BA',           sqft:850, standard:200, deep:315, move:355, weekly:160, biweekly:170, monthly:185},
-    {key:'2b2b',    label:'2BR, 2BA',           sqft:1100, standard:220, deep:350, move:395, weekly:175, biweekly:190, monthly:205},
-    {key:'3b2b',    label:'3BR, 2BA',           sqft:1500, standard:245, deep:390, move:435, weekly:195, biweekly:205, monthly:225},
-    {key:'4b25b',   label:'4BR, 2.5BA',         sqft:2000, standard:290, deep:460, move:515, weekly:230, biweekly:245, monthly:265},
-    {key:'4b3b',    label:'4BR, 3BA',           sqft:2500, standard:330, deep:530, move:595, weekly:265, biweekly:285, monthly:320},
+    {key:'studio1', label:'Studio / 1BR, 1BA', sqft:600},
+    {key:'2b1b',    label:'2BR, 1BA',          sqft:850},
+    {key:'2b2b',    label:'2BR, 2BA',          sqft:1100},
+    {key:'3b2b',    label:'3BR, 2BA',          sqft:1500},
+    {key:'4b25b',   label:'4BR, 2.5BA',        sqft:2000},
+    {key:'4b3b',    label:'4BR, 3BA',          sqft:2500},
   ];
   const FREQS = [
     {key:'onetime',  label:'Standard clean', sub:'one-time'},
@@ -522,12 +529,12 @@
     {key:'monthly',  label:'Monthly', sub:'recurring'},
   ];
   const ADDONS = [
-    {key:'oven', label:'Inside oven', price:40},
-    {key:'fridge', label:'Inside fridge', price:40},
-    {key:'windows', label:'Interior windows', price:60},
-    {key:'cabinets', label:'Inside cabinets', price:70},
-    {key:'baseboards', label:'Baseboards', price:45},
-    {key:'washerdryer', label:'Washer / dryer', price:40},
+    {key:'oven', label:'Inside oven'},
+    {key:'fridge', label:'Inside fridge'},
+    {key:'windows', label:'Interior windows'},
+    {key:'cabinets', label:'Inside cabinets'},
+    {key:'baseboards', label:'Baseboards'},
+    {key:'washerdryer', label:'Washer / dryer'},
   ];
   const BIZ_TYPES = [
     {key:'office', label:'Office'},
@@ -595,8 +602,6 @@
     {key:'ny', label:'New York City'},
   ];
 
-  const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
-
   function radioCards(container, name, items, defaultKey, subKeyFn){
     container.innerHTML = items.map((it,i)=>{
       const id = name+'-'+it.key;
@@ -613,10 +618,9 @@
     container.className = gridClass || 'addon-grid';
     container.innerHTML = items.map(it=>{
       const id = 'chk-'+it.key;
-      const priceTag = (it.price !== undefined) ? `<span class="price">+${fmt(it.price)}</span>` : '';
       return `<div class="addon">
         <input type="checkbox" id="${id}" data-key="${it.key}">
-        <label for="${id}"><span>${it.label}</span>${priceTag}</label>
+        <label for="${id}"><span>${it.label}</span></label>
       </div>`;
     }).join('');
   }
@@ -654,71 +658,64 @@
     return Array.from(container.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.dataset.key);
   }
 
-  function buildResidentialEstimate(){
-    const homeKey = selectedRadio('homeSize');
-    const home = HOMES.find(h=>h.key===homeKey);
+  function buildResidentialRecap(){
+    const home = HOMES.find(h=>h.key===selectedRadio('homeSize'));
     const freqKey = selectedRadio('frequency');
     const needsExtra = document.getElementById('needsExtra').checked;
     const addonKeys = checkedKeys(document.getElementById('addonGrid'));
     const addons = ADDONS.filter(a=>addonKeys.includes(a.key));
-    const addonsTotal = addons.reduce((s,a)=>s+a.price,0);
-
-    let lines = [];
-    let headline = home.label + ' — ';
     const freqLabel = FREQS.find(f=>f.key===freqKey).label;
 
+    const rows = [{label:'Home', value: home.label}];
+    let headline = home.label + ' — ';
+
     if(freqKey==='onetime'){
-      const useDeep = needsExtra;
-      const base = useDeep ? home.deep : home.standard;
-      lines.push({label: useDeep ? 'Deep clean (extra attention needed)' : 'Standard clean, one time', value: base + addonsTotal});
+      rows.push({label:'Service', value: needsExtra ? 'One-time clean, needs extra attention' : 'Standard clean, one time'});
       headline += 'one-time';
     } else if(freqKey==='deep'){
-      lines.push({label:'Deep clean', value: home.deep + addonsTotal});
+      rows.push({label:'Service', value:'Deep clean'});
       headline += 'deep clean';
     } else if(freqKey==='movein'){
-      lines.push({label:'Move-in / move-out clean', value: home.move + addonsTotal});
+      rows.push({label:'Service', value:'Move-in / move-out clean'});
       headline += 'move-in / move-out';
     } else {
-      const recurringVal = home[freqKey];
-      lines.push({label:'First visit (always a deep clean)', value: home.deep + addonsTotal});
-      lines.push({label:'Then every visit (' + freqLabel.toLowerCase() + ')', value: recurringVal});
+      rows.push({label:'Service', value: freqLabel + ', starting with a deep clean'});
       headline += freqLabel.toLowerCase();
     }
 
-    return { headline, lines, addons, total: lines[lines.length-1].value, firstTotal: lines[0].value };
+    if(addons.length) rows.push({label:'Add-ons', value: addons.map(a=>a.label).join(', ')});
+
+    return { headline, rows, addons };
+  }
+
+  function renderRecap(headline, rows, footnote){
+    document.getElementById('sumHeadline').textContent = headline;
+    let html = rows.map(r =>
+      `<div class="price-line"><span class="plabel">${r.label}</span><span class="pval recap">${r.value}</span></div>`
+    ).join('');
+    html += `<hr class="rule">`;
+    html += `<div class="footnote">${footnote}</div>`;
+    document.getElementById('sumBody').innerHTML = html;
   }
 
   function renderResidentialSummary(){
-    const est = buildResidentialEstimate();
-    const isNY = selectedRadio('state') === 'ny';
-    document.getElementById('sumHeadline').textContent = est.headline;
-
-    let html = '';
-    est.lines.forEach(l=>{
-      html += `<div class="price-line"><span class="plabel">${l.label}</span><span class="pval">${fmt(l.value)}</span></div>`;
-    });
-    if(est.addons.length){
-      html += `<div class="addon-list">Includes: ${est.addons.map(a=>a.label+' ('+fmt(a.price)+')').join(', ')}</div>`;
-    }
-    html += `<hr class="rule">`;
-    if(isNY){
-      html += `<div class="footnote"><strong>NYC estimate:</strong> the numbers above are our New Jersey rate card as a starting point. We'll confirm your final NYC price by phone before booking.</div>`;
-    } else {
-      html += `<div class="footnote">Estimate for a home in normal condition. Homes that need extra work are priced as a deep clean. Final price is confirmed at the door.</div>`;
-    }
-    document.getElementById('sumBody').innerHTML = html;
+    const recap = buildResidentialRecap();
+    renderRecap(recap.headline, recap.rows,
+      "Send us your details and we'll reply with your quote, usually within one business day. Prices depend on the size and condition of the home, so we'd rather look at yours than guess.");
   }
 
   function renderCommercialSummary(){
     const bizType = BIZ_TYPES.find(b=>b.key===selectedRadio('bizType'));
     const sqft = document.getElementById('bizSqft').value;
     const freq = document.getElementById('bizFreq').value;
-    document.getElementById('sumHeadline').textContent = (bizType ? bizType.label : 'Business') + ' — custom quote';
-    document.getElementById('sumBody').innerHTML = `
-      <div class="price-line total"><span class="plabel">Estimate</span><span class="pval" style="font-size:16px;">Pending walkthrough</span></div>
-      <hr class="rule">
-      <div class="footnote">Commercial jobs are priced after we see the space — usually within one business day of your request. ${sqft ? 'Space entered: ~'+sqft+' sq ft. ' : ''}${freq ? 'Frequency requested: '+freq+'.' : ''}</div>
-    `;
+    const freqLabel = {weekly:'Weekly', biweekly:'Bi-weekly', monthly:'Monthly', onetime:'One-time clean'}[freq] || freq;
+
+    const rows = [{label:'Space', value: bizType ? bizType.label : '—'}];
+    if(sqft) rows.push({label:'Size', value:'~' + sqft + ' sq ft'});
+    if(freq) rows.push({label:'Frequency', value: freqLabel});
+
+    renderRecap((bizType ? bizType.label : 'Business') + ' — quote request', rows,
+      "Business jobs are quoted after a short walkthrough. Send us your details and we'll follow up to set it up, usually within one business day.");
   }
 
   function currentServiceType(){ return selectedRadio('serviceType'); }
@@ -742,7 +739,7 @@
 
     if(svc==='residential') renderResidentialSummary(); else renderCommercialSummary();
     document.getElementById('stateNote').textContent = selectedRadio('state')==='ny'
-      ? "Our published rates are built from New Jersey pricing — we'll confirm your NYC number by phone."
+      ? "We serve New York City too — tell us your neighborhood and we'll confirm we can get to you."
       : '';
     updateActionState();
   }
@@ -771,10 +768,9 @@
     lines.push('');
 
     if(svc==='residential'){
-      const est = buildResidentialEstimate();
-      lines.push('SERVICE: ' + est.headline);
-      est.lines.forEach(l=> lines.push('  ' + l.label + ': ' + fmt(l.value)));
-      if(est.addons.length) lines.push('  Add-ons: ' + est.addons.map(a=>a.label+' ('+fmt(a.price)+')').join(', '));
+      const recap = buildResidentialRecap();
+      lines.push('SERVICE: ' + recap.headline);
+      recap.rows.forEach(r=> lines.push('  ' + r.label + ': ' + r.value));
     } else {
       const bizType = BIZ_TYPES.find(b=>b.key===selectedRadio('bizType'));
       const sqft = document.getElementById('bizSqft').value;
@@ -782,7 +778,6 @@
       lines.push('SERVICE: Commercial — ' + (bizType ? bizType.label : '—'));
       lines.push('  Approx. sq ft: ' + (sqft || '—'));
       lines.push('  Desired frequency: ' + (freq || '—'));
-      lines.push('  Note: commercial jobs are quoted after a walkthrough.');
     }
     lines.push('');
     lines.push('HOW I LIKE IT DONE');
