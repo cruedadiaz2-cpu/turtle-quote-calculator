@@ -260,7 +260,7 @@
   .btn-primary:hover{ background:var(--forest-dark); }
   .btn-secondary{ background:transparent; border-color:var(--border-strong); color:var(--charcoal); }
   .btn-secondary:hover{ border-color:var(--forest); color:var(--forest-dark); }
-  .btn[disabled], .btn.is-disabled{ opacity:.5; cursor:not-allowed; pointer-events:none; }
+  .btn[disabled], .btn.is-disabled, .linklike.is-disabled{ opacity:.5; cursor:not-allowed; pointer-events:none; }
   .btn:focus-visible{ outline:2px solid var(--forest); outline-offset:2px; }
   .copy-ok{ font-size:12px; color:var(--forest-dark); text-align:center; height:14px; }
   .fallback-hint{
@@ -487,10 +487,13 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.75 13.5L3 21l4.6-1.21A9 9 0 1 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 9.3c0-.4.3-.8.7-.8h.7c.3 0 .6.2.7.5l.5 1.3c.1.3 0 .6-.2.8l-.5.5c.4.9 1.1 1.6 2 2l.5-.5c.2-.2.5-.3.8-.2l1.3.5c.3.1.5.4.5.7v.7c0 .4-.4.7-.8.7-3 0-5.7-2.7-5.7-5.7z" fill="currentColor"/></svg>
             Send by WhatsApp
           </a>
-          <a class="btn btn-secondary is-disabled" id="btnEmail" role="button" target="_blank" rel="noopener">
+          <a class="btn btn-secondary is-disabled" id="btnEmail" role="button" rel="noopener">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             Send by email
           </a>
+          <p class="fallback-hint">
+            No email app on this device? <a class="linklike is-disabled" id="btnGmail" target="_blank" rel="noopener">Open Gmail instead</a> — you'll need to be signed in to Google.
+          </p>
           <p class="fallback-hint" id="lengthWarning" hidden>
             Your notes are too long to send through a link. <button type="button" class="linklike" id="btnLengthCopy">Copy the details</button> and paste them into a message instead — nothing gets cut off that way.
           </p>
@@ -814,14 +817,10 @@
   const WHATSAPP_NUMBER = '19088805716';
   const TURTLE_EMAIL = 'managturtlecs@gmail.com';
 
-  // Phones nearly always have a mail app registered, so mailto: opens the Gmail app
-  // on Android and Mail on iPhone with the message already filled in. Desktops are
-  // the opposite case: a machine whose mailto: points at a browser with no web mail
-  // registered lands on a dead-end error page, so those get Gmail's web compose.
-  // iPadOS reports itself as a Mac, hence the touch-point check.
-  const UA = navigator.userAgent;
-  const IS_IOS = /iPhone|iPad|iPod/.test(UA) || (/Macintosh/.test(UA) && navigator.maxTouchPoints > 1);
-  const IS_MOBILE = IS_IOS || /Android/i.test(UA);
+  // Neither email route works for everyone: mailto: needs a mail app registered on
+  // the device, and Gmail's web compose needs an active Google session (an incognito
+  // window or a non-Gmail user gets bounced to a marketing page, losing the message).
+  // So both are offered, labelled, and the client picks the one they actually have.
 
   // A mailto: handler truncates past roughly 2048 chars; an https URL carries far more.
   const MAILTO_MAX = 1900;
@@ -831,42 +830,46 @@
     return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(buildPlainTextSummary());
   }
 
-  function buildEmailUrl(){
-    const subject = 'Quote request — ' + document.getElementById('cName').value.trim();
-    const body = buildPlainTextSummary();
-    if(IS_MOBILE){
-      return 'mailto:' + TURTLE_EMAIL
-        + '?subject=' + encodeURIComponent(subject)
-        + '&body=' + encodeURIComponent(body);
-    }
+  function emailSubject(){
+    return 'Quote request — ' + document.getElementById('cName').value.trim();
+  }
+
+  function buildMailtoUrl(){
+    return 'mailto:' + TURTLE_EMAIL
+      + '?subject=' + encodeURIComponent(emailSubject())
+      + '&body=' + encodeURIComponent(buildPlainTextSummary());
+  }
+
+  function buildGmailUrl(){
     return 'https://mail.google.com/mail/?view=cm&fs=1'
       + '&to=' + encodeURIComponent(TURTLE_EMAIL)
-      + '&su=' + encodeURIComponent(subject)
-      + '&body=' + encodeURIComponent(body);
+      + '&su=' + encodeURIComponent(emailSubject())
+      + '&body=' + encodeURIComponent(buildPlainTextSummary());
   }
 
   function updateActionState(){
     const ok = document.getElementById('cName').value.trim() && document.getElementById('cPhone').value.trim();
     const waLink = document.getElementById('btnWhatsapp');
-    const emailLink = document.getElementById('btnEmail');
+    const mailLink = document.getElementById('btnEmail');
+    const gmailLink = document.getElementById('btnGmail');
     const lengthWarning = document.getElementById('lengthWarning');
     document.getElementById('btnCopy').disabled = !ok;
 
     const waUrl = ok ? buildWhatsappUrl() : '';
-    const emailUrl = ok ? buildEmailUrl() : '';
-    // Judged separately: if one path is too long to carry the notes, the other may
-    // still work, and disabling both would strand the client for no reason.
+    const mailUrl = ok ? buildMailtoUrl() : '';
+    const gmailUrl = ok ? buildGmailUrl() : '';
+    // Judged separately: one route being too long to carry the notes says nothing
+    // about the others, and disabling all three would strand the client.
     const waOk = ok && waUrl.length <= URL_MAX;
-    const emailOk = ok && emailUrl.length <= (IS_MOBILE ? MAILTO_MAX : URL_MAX);
+    const mailOk = ok && mailUrl.length <= MAILTO_MAX;
+    const gmailOk = ok && gmailUrl.length <= URL_MAX;
 
-    [[waLink, waUrl, waOk], [emailLink, emailUrl, emailOk]].forEach(([link, url, live])=>{
+    [[waLink, waUrl, waOk], [mailLink, mailUrl, mailOk], [gmailLink, gmailUrl, gmailOk]].forEach(([link, url, live])=>{
       if(live){ link.href = url; } else { link.removeAttribute('href'); }
       link.classList.toggle('is-disabled', !live);
     });
-    // A mailto: opened in a new tab leaves an empty one behind once the mail app takes over.
-    if(IS_MOBILE){ emailLink.removeAttribute('target'); } else { emailLink.target = '_blank'; }
 
-    lengthWarning.hidden = !(ok && !(waOk && emailOk));
+    lengthWarning.hidden = !(ok && !(waOk && mailOk && gmailOk));
   }
 
   async function copyDetails(){
