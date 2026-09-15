@@ -1,0 +1,884 @@
+<title>Turtle Cleaning Estimate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --forest:#3D5E33;
+    --forest-dark:#2E4726;
+    --forest-light:#4F7A41;
+    --sage:#DDE8C0;
+    --sage-tint:#F1F5E7;
+    --charcoal:#323232;
+    --bg:#F8F8F2;
+    --surface:#FFFFFF;
+    --border:#E1E1D6;
+    --border-strong:#C7CCB8;
+    --muted:#6B6F62;
+    --danger:#8A3B2B;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(50,50,50,.06), 0 8px 24px -12px rgba(61,94,51,.18);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --forest:#8FC46E;
+      --forest-dark:#6FA352;
+      --forest-light:#A6D389;
+      --sage:#3A4530;
+      --sage-tint:#232A1C;
+      --charcoal:#ECEFE4;
+      --bg:#181D14;
+      --surface:#20261A;
+      --border:#333B27;
+      --border-strong:#454F35;
+      --muted:#9AA189;
+      --danger:#E38A76;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --forest:#8FC46E;
+    --forest-dark:#6FA352;
+    --forest-light:#A6D389;
+    --sage:#3A4530;
+    --sage-tint:#232A1C;
+    --charcoal:#ECEFE4;
+    --bg:#181D14;
+    --surface:#20261A;
+    --border:#333B27;
+    --border-strong:#454F35;
+    --muted:#9AA189;
+    --danger:#E38A76;
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--charcoal);
+    font-family:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:0 18px 64px;
+  }
+  h1,h2,h3{ font-weight:600; text-wrap:balance; margin:0; }
+  p{ margin:0; }
+  .wrap{ max-width:1080px; margin:0 auto; }
+
+  /* ---------- Header ---------- */
+  header.hero{
+    padding:40px 0 28px;
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .brandrow{ display:flex; align-items:center; gap:12px; }
+  .brandrow .mark{ flex:none; display:block; width:40px; height:auto; }
+  .brandrow .mark-white{ display:none; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .mark-color{ display:none; }
+    :root:not([data-theme="light"]) .mark-white{ display:block; }
+  }
+  :root[data-theme="dark"] .mark-color{ display:none; }
+  :root[data-theme="dark"] .mark-white{ display:block; }
+  .brandrow .wordmark{
+    font-size:15px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--forest-dark);
+  }
+  .brandrow .wordmark span{ display:block; font-size:10px; font-weight:500; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; }
+  h1.title{ font-size:clamp(28px,4vw,40px); line-height:1.08; max-width:16ch; }
+  .lede{ font-size:16px; line-height:1.55; color:var(--muted); max-width:56ch; }
+  .tagline-chip{
+    display:inline-flex; align-self:flex-start; align-items:center; gap:8px;
+    background:var(--forest); color:#fff; font-weight:600; font-size:13px;
+    padding:7px 14px; border-radius:999px;
+  }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:8px 18px;
+    font-size:13px; color:var(--muted);
+  }
+  .meta-row li{ list-style:none; display:flex; align-items:center; gap:6px; }
+  .meta-row{ display:flex; padding:0; margin:0; }
+  .meta-row svg{ flex:none; }
+
+  /* ---------- Layout grid ---------- */
+  main{
+    display:grid;
+    grid-template-columns: 1fr;
+    gap:28px;
+    margin-top:8px;
+  }
+  @media (min-width:880px){
+    main{ grid-template-columns: minmax(0,1fr) 340px; align-items:start; }
+    .summary-col{ position:sticky; top:20px; order:2; }
+    .form-col{ order:1; }
+  }
+
+  section.card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:24px;
+    box-shadow:var(--shadow);
+    display:flex; flex-direction:column; gap:18px;
+  }
+  .step-head{ display:flex; align-items:baseline; gap:10px; }
+  .step-num{
+    flex:none; width:26px; height:26px; border-radius:50%;
+    background:var(--sage); color:var(--forest-dark); font-size:13px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step-head h2{ font-size:18px; }
+  .step-sub{ font-size:13.5px; color:var(--muted); margin-top:-8px; padding-left:36px; line-height:1.5; }
+
+  /* ---------- Pill toggle (service type) ---------- */
+  .pillgroup{ display:flex; gap:10px; flex-wrap:wrap; padding-left:36px; }
+  .pill{
+    position:relative;
+  }
+  .pill input{ position:absolute; opacity:0; inset:0; cursor:pointer; margin:0; }
+  .pill label{
+    display:block; padding:9px 18px; border-radius:999px;
+    border:1.5px solid var(--border-strong); font-size:13.5px; font-weight:500;
+    color:var(--charcoal); cursor:pointer; transition:.15s;
+  }
+  .pill input:checked + label{
+    background:var(--forest); border-color:var(--forest); color:#fff;
+  }
+  .pill input:focus-visible + label{ outline:2px solid var(--forest); outline-offset:2px; }
+
+  /* ---------- Option cards (home size / frequency / biz type) ---------- */
+  .optgrid{
+    display:grid; gap:10px; padding-left:36px;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  }
+  .opt{ position:relative; }
+  .opt input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .opt label{
+    display:flex; flex-direction:column; gap:2px;
+    border:1.5px solid var(--border-strong); border-radius:10px;
+    padding:12px 14px; cursor:pointer; height:100%; transition:.15s;
+    background:var(--surface);
+  }
+  .opt .opt-title{ font-size:13.5px; font-weight:600; }
+  .opt .opt-sub{ font-size:12px; color:var(--muted); }
+  .opt input:checked + label{
+    border-color:var(--forest); background:var(--sage-tint);
+    box-shadow:inset 0 0 0 1px var(--forest);
+  }
+  .opt input:focus-visible + label{ outline:2px solid var(--forest); outline-offset:2px; }
+
+  .inline-note{
+    margin-left:36px;
+    font-size:12.5px; color:var(--muted); line-height:1.5;
+  }
+
+  /* ---------- Checkbox row (condition, addons) ---------- */
+  .check-row{
+    padding-left:36px; display:flex; align-items:flex-start; gap:10px;
+  }
+  .check-row input{ margin-top:3px; width:16px; height:16px; accent-color:var(--forest); flex:none; }
+  .check-row label{ font-size:13.5px; line-height:1.45; }
+  .check-row label .sub{ display:block; font-size:12px; color:var(--muted); margin-top:2px; }
+
+  .addon-grid{
+    padding-left:36px;
+    display:grid; gap:8px;
+    grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+  }
+  .addon{
+    display:flex; align-items:center; gap:10px;
+    border:1.5px solid var(--border); border-radius:10px; padding:10px 12px;
+  }
+  .addon input{ width:16px; height:16px; accent-color:var(--forest); flex:none; }
+  .addon label{ font-size:13px; display:flex; justify-content:space-between; flex:1; gap:8px; cursor:pointer; }
+  .addon .price{ color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  /* ---------- Form fields ---------- */
+  .field{ padding-left:36px; display:flex; flex-direction:column; gap:6px; }
+  .field label.flabel{ font-size:13px; font-weight:600; }
+  .field .req{ color:var(--danger); }
+  .field input[type=text],
+  .field input[type=tel],
+  .field input[type=email],
+  .field input[type=number],
+  .field select,
+  .field textarea{
+    font:inherit; font-size:14px;
+    border:1.5px solid var(--border-strong); border-radius:9px;
+    background:var(--surface); color:var(--charcoal);
+    padding:10px 12px; width:100%;
+  }
+  .field textarea{ resize:vertical; min-height:64px; }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:2px solid var(--forest); outline-offset:1px;
+  }
+  .field-row{ padding-left:36px; display:grid; gap:14px; grid-template-columns:1fr 1fr; }
+  @media (max-width:520px){ .field-row{ grid-template-columns:1fr; } }
+  .field-row .field{ padding-left:0; }
+
+  .biz-note{
+    margin-left:36px; background:var(--sage-tint); border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px; font-size:13px; line-height:1.55; color:var(--charcoal);
+  }
+
+  /* ---------- Summary panel ---------- */
+  .summary{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .summary-head{
+    background:var(--forest); color:#fff; padding:18px 20px;
+  }
+  .summary-head .eyebrow{ font-size:11px; letter-spacing:.1em; text-transform:uppercase; opacity:.85; }
+  .summary-head .headline{ font-size:15px; font-weight:600; margin-top:4px; }
+  .summary-body{ padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+  .price-line{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .price-line .plabel{ font-size:13px; color:var(--muted); line-height:1.4; }
+  .price-line .pval{ font-size:15px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  /* Recap values are words, not figures: let them wrap and sit beside their label. */
+  .price-line.recap-row{ align-items:start; gap:16px; }
+  .price-line .pval.recap{
+    font-size:13.5px; white-space:normal; text-align:right; line-height:1.45; min-width:0;
+  }
+  .price-line.total .plabel{ font-size:13px; font-weight:600; color:var(--charcoal); }
+  .price-line.total .pval{ font-size:26px; color:var(--forest-dark); }
+  hr.rule{ border:none; border-top:1px solid var(--border); margin:0; }
+  .addon-list{ font-size:12.5px; color:var(--muted); line-height:1.7; }
+  .footnote{ font-size:11.5px; color:var(--muted); line-height:1.5; }
+
+  .actions{ display:flex; flex-direction:column; gap:8px; padding:0 20px 20px; }
+  button.btn, a.btn{
+    font:inherit; font-size:13.5px; font-weight:600; text-align:center; text-decoration:none;
+    border-radius:9px; padding:11px 14px; cursor:pointer; border:1.5px solid transparent;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-primary{ background:var(--forest); color:#fff; }
+  .btn-primary:hover{ background:var(--forest-dark); }
+  .btn-secondary{ background:transparent; border-color:var(--border-strong); color:var(--charcoal); }
+  .btn-secondary:hover{ border-color:var(--forest); color:var(--forest-dark); }
+  .btn[disabled], .btn.is-disabled, .linklike.is-disabled{ opacity:.5; cursor:not-allowed; pointer-events:none; }
+  .btn:focus-visible{ outline:2px solid var(--forest); outline-offset:2px; }
+  .copy-ok{ font-size:12px; color:var(--forest-dark); text-align:center; height:14px; }
+  .fallback-hint{
+    margin:0; font-size:12px; line-height:1.5; color:var(--muted); text-align:center;
+  }
+  .fallback-hint .linklike{
+    font:inherit; font-weight:600; color:var(--forest-dark); background:none; border:none;
+    padding:0; text-decoration:underline; cursor:pointer;
+  }
+  .fallback-hint .linklike:focus-visible{ outline:2px solid var(--forest); outline-offset:2px; }
+
+  footer.page-footer{
+    max-width:1080px; margin:40px auto 0; padding-top:20px; border-top:1px solid var(--border);
+    font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 18px; justify-content:space-between;
+  }
+
+  @media (max-width:520px){
+    .step-sub, .optgrid, .inline-note, .check-row, .addon-grid, .field, .field-row, .biz-note{ padding-left:0; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="brandrow">
+      <img class="mark mark-color" src="turtle-mark-color.png" width="48" height="71" alt="Turtle Cleaning Services">
+      <img class="mark mark-white" src="turtle-mark-white.png" width="48" height="71" alt="" aria-hidden="true">
+      <div class="wordmark">Turtle Cleaning Services<span>North NJ &amp; New York City</span></div>
+    </div>
+
+    <h1 class="title">Request your cleaning quote</h1>
+    <p class="lede">Tell us about your home (or your business) and how you like things done. Send it over and we'll come back with your quote, usually within one business day.</p>
+    <span class="tagline-chip">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      We don't cut corners.
+    </span>
+    <ul class="meta-row">
+      <li>Locally owned · Based in Union County, NJ</li>
+      <li>Since 2023</li>
+      <li>The owner is on every job</li>
+      <li>Weekend appointments</li>
+      <li>(908) 880-5716</li>
+    </ul>
+  </header>
+
+  <main>
+    <div class="form-col" style="display:flex; flex-direction:column; gap:20px;">
+
+      <!-- STEP 1: service type -->
+      <section class="card">
+        <div class="step-head"><span class="step-num">1</span><h2>What are we cleaning?</h2></div>
+        <div class="pillgroup" role="radiogroup" aria-label="Service type">
+          <div class="pill">
+            <input type="radio" name="serviceType" id="svc-res" value="residential" checked>
+            <label for="svc-res">Home</label>
+          </div>
+          <div class="pill">
+            <input type="radio" name="serviceType" id="svc-com" value="commercial">
+            <label for="svc-com">Small business</label>
+          </div>
+        </div>
+      </section>
+
+      <!-- STEP 2: RESIDENTIAL -->
+      <section class="card" id="block-residential">
+        <div class="step-head"><span class="step-num">2</span><h2>Your home</h2></div>
+        <p class="step-sub">Pick the closest match — if your place is unusual, tell us in the notes at the end.</p>
+
+        <div class="optgrid" role="radiogroup" aria-label="Home size" id="homeSizeGroup">
+          <!-- filled by JS -->
+        </div>
+
+        <div class="step-head" style="margin-top:4px;"><span class="step-num" style="visibility:hidden;">·</span><h3 style="font-size:14.5px;">How often?</h3></div>
+        <div class="optgrid" role="radiogroup" aria-label="Cleaning frequency" id="frequencyGroup">
+          <!-- filled by JS -->
+        </div>
+        <p class="inline-note" id="freqNote"></p>
+
+        <div class="check-row">
+          <input type="checkbox" id="needsExtra">
+          <label for="needsExtra">It's been a while since a professional clean — the house needs extra attention
+            <span class="sub">We'll quote it as a deep clean instead of a standard one, so there's no surprise at the door.</span>
+          </label>
+        </div>
+
+        <div class="step-head" style="margin-top:4px;"><span class="step-num" style="visibility:hidden;">·</span><h3 style="font-size:14.5px;">Add anything extra?</h3></div>
+        <div class="addon-grid" id="addonGrid"><!-- filled by JS --></div>
+        <p class="inline-note">Blinds and other specialty requests are quoted on site. Add-ons apply to your first visit — ask any time to add one to a later visit.</p>
+      </section>
+
+      <!-- STEP 2: COMMERCIAL -->
+      <section class="card" id="block-commercial" style="display:none;">
+        <div class="step-head"><span class="step-num">2</span><h2>Your space</h2></div>
+
+        <div class="optgrid" role="radiogroup" aria-label="Business type" id="bizTypeGroup"><!-- JS --></div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="flabel" for="bizSqft">Approx. square footage</label>
+            <input type="number" id="bizSqft" min="0" step="50" placeholder="e.g. 2000">
+          </div>
+          <div class="field">
+            <label class="flabel" for="bizFreq">Desired frequency</label>
+            <select id="bizFreq">
+              <option value="weekly">Weekly</option>
+              <option value="biweekly">Bi-weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="onetime">One-time clean</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="biz-note">
+          We're finishing the paperwork on our commercial coverage, so business jobs are priced after a short walkthrough rather than instantly online. Tell us about your space below and we'll follow up with a real number, usually within one business day.
+        </div>
+      </section>
+
+      <!-- STEP 3: preferences -->
+      <section class="card">
+        <div class="step-head"><span class="step-num">3</span><h2>Tell us how you like it done</h2></div>
+        <p class="step-sub">The more we know before we arrive, the less time we spend guessing.</p>
+
+        <div class="field">
+          <label class="flabel">Getting in</label>
+        </div>
+        <div class="optgrid" role="radiogroup" aria-label="How we get in" id="accessGroup"><!-- JS --></div>
+
+        <div id="petsSection">
+          <div class="field">
+            <label class="flabel">Pets at home</label>
+          </div>
+          <div class="addon-grid" id="petsGrid"><!-- JS --></div>
+          <div class="field">
+            <label class="flabel" for="petsNote">Anything we should know about them</label>
+            <textarea id="petsNote" placeholder="Friendly but loud, keep the back gate closed, cat hides under the bed..."></textarea>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="flabel" id="priorityLabel">Where should we spend the most care</label>
+        </div>
+        <div class="addon-grid" id="priorityGrid"><!-- JS --></div>
+        <div class="field">
+          <label class="flabel" for="priorityOtherNote">Something else that needs extra care</label>
+          <input type="text" id="priorityOtherNote" placeholder="Tell us what else needs the extra attention">
+        </div>
+
+        <div class="field">
+          <label class="flabel">Products</label>
+        </div>
+        <div class="optgrid" role="radiogroup" aria-label="Product preference" id="productsGroup"><!-- JS --></div>
+
+        <div class="field">
+          <label class="flabel">Fragrance</label>
+        </div>
+        <div class="optgrid" role="radiogroup" aria-label="Fragrance preference" id="scentGroup"><!-- JS --></div>
+        <div class="field">
+          <label class="flabel" for="scentNote">A specific scent you like, or one to stay away from</label>
+          <input type="text" id="scentNote" placeholder="e.g. love anything citrus, please no lavender">
+        </div>
+
+        <div class="field">
+          <label class="flabel" for="avoidNote">Anything off-limits</label>
+          <textarea id="avoidNote" placeholder="Rooms to skip, fragile items, a home office not to touch..."></textarea>
+        </div>
+        <div class="field">
+          <label class="flabel" for="otherNote">Anything else worth knowing</label>
+          <textarea id="otherNote" placeholder="Parking instructions, a squeaky door, whatever helps."></textarea>
+        </div>
+      </section>
+
+      <!-- STEP 4: contact -->
+      <section class="card">
+        <div class="step-head"><span class="step-num">4</span><h2>You</h2></div>
+
+        <div class="field-row">
+          <div class="field">
+            <label class="flabel" for="cName">Name <span class="req">*</span></label>
+            <input type="text" id="cName" autocomplete="name">
+          </div>
+          <div class="field">
+            <label class="flabel" for="cPhone">Phone <span class="req">*</span></label>
+            <input type="tel" id="cPhone" autocomplete="tel">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="flabel" for="cEmail">Email</label>
+            <input type="email" id="cEmail" autocomplete="email">
+          </div>
+          <div class="field">
+            <label class="flabel" for="cTown">Town / neighborhood</label>
+            <input type="text" id="cTown" placeholder="e.g. Westfield, NJ or Upper East Side" autocomplete="address-level2">
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="flabel">State</label>
+        </div>
+        <div class="pillgroup" style="padding-left:0;" role="radiogroup" aria-label="State" id="stateGroup"><!-- JS --></div>
+        <p class="inline-note" id="stateNote" style="padding-left:0;"></p>
+
+        <div class="field">
+          <label class="flabel">Preferred day</label>
+        </div>
+        <div class="pillgroup" style="padding-left:0;" role="radiogroup" aria-label="Preferred day" id="dayGroup"><!-- JS --></div>
+        <p class="inline-note" style="padding-left:0;">We're based in Union County, NJ and currently run Saturdays and Sundays across North &amp; Central New Jersey and New York City. Tell us your town or borough and we'll confirm we can get to you.</p>
+      </section>
+
+    </div>
+
+    <div class="summary-col">
+      <div class="summary">
+        <div class="summary-head">
+          <div class="eyebrow">Your request</div>
+          <div class="headline" id="sumHeadline">Studio / 1 bed, 1 bath — one-time</div>
+        </div>
+        <div class="summary-body" id="sumBody"><!-- JS --></div>
+        <hr class="rule">
+        <div class="actions">
+          <a class="btn btn-primary is-disabled" id="btnWhatsapp" role="button" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-7.75 13.5L3 21l4.6-1.21A9 9 0 1 0 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.5 9.3c0-.4.3-.8.7-.8h.7c.3 0 .6.2.7.5l.5 1.3c.1.3 0 .6-.2.8l-.5.5c.4.9 1.1 1.6 2 2l.5-.5c.2-.2.5-.3.8-.2l1.3.5c.3.1.5.4.5.7v.7c0 .4-.4.7-.8.7-3 0-5.7-2.7-5.7-5.7z" fill="currentColor"/></svg>
+            Send by WhatsApp
+          </a>
+          <a class="btn btn-secondary is-disabled" id="btnEmail" role="button" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="1.8"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            Send by email
+          </a>
+          <p class="fallback-hint">
+            No email app on this device? <a class="linklike is-disabled" id="btnGmail" target="_blank" rel="noopener">Open Gmail instead</a> — you'll need to be signed in to Google.
+          </p>
+          <p class="fallback-hint" id="lengthWarning" hidden>
+            Your notes are too long to send through a link. <button type="button" class="linklike" id="btnLengthCopy">Copy the details</button> and paste them into a message instead — nothing gets cut off that way.
+          </p>
+          <button class="btn btn-secondary" id="btnCopy" type="button">Copy details</button>
+          <div class="copy-ok" id="copyOk"></div>
+          <a class="btn btn-secondary" href="tel:+19088805716">Call or text (908) 880-5716</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <span>Turtle Cleaning Services LLC · Locally owned, based in Union County, NJ · Serving North NJ &amp; NYC · Since 2023</span>
+    <span>We quote every job individually, based on the size and condition of the space.</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // No rates live in this page on purpose: quotes are sent by reply, and anything
+  // published here would be readable in the page source.
+  const HOMES = [
+    {key:'studio1', label:'Studio / 1BR, 1BA', sqft:600},
+    {key:'2b1b',    label:'2BR, 1BA',          sqft:850},
+    {key:'2b2b',    label:'2BR, 2BA',          sqft:1100},
+    {key:'3b2b',    label:'3BR, 2BA',          sqft:1500},
+    {key:'4b25b',   label:'4BR, 2.5BA',        sqft:2000},
+    {key:'4b3b',    label:'4BR, 3BA',          sqft:2500},
+  ];
+  const FREQS = [
+    {key:'onetime',  label:'Standard clean', sub:'one-time'},
+    {key:'deep',     label:'Deep clean', sub:'first-time or seasonal reset'},
+    {key:'movein',   label:'Move-in / move-out', sub:'empty unit'},
+    {key:'weekly',   label:'Weekly', sub:'recurring'},
+    {key:'biweekly', label:'Bi-weekly', sub:'recurring'},
+    {key:'monthly',  label:'Monthly', sub:'recurring'},
+  ];
+  const ADDONS = [
+    {key:'oven', label:'Inside oven'},
+    {key:'fridge', label:'Inside fridge'},
+    {key:'windows', label:'Interior windows'},
+    {key:'cabinets', label:'Inside cabinets'},
+    {key:'baseboards', label:'Baseboards'},
+    {key:'washerdryer', label:'Washer / dryer'},
+  ];
+  const BIZ_TYPES = [
+    {key:'office', label:'Office'},
+    {key:'retail', label:'Retail store'},
+    {key:'restaurant', label:'Restaurant / food service'},
+    {key:'other', label:'Other'},
+  ];
+  const ACCESS = [
+    {key:'home', label:'Someone will be home'},
+    {key:'key', label:'Key or lockbox'},
+    {key:'code', label:'Door code'},
+    {key:'coordinate', label:"We'll coordinate by phone"},
+  ];
+  const BUSINESS_ACCESS = [
+    {key:'staff', label:'Staff will be on site'},
+    {key:'key', label:'Key or lockbox'},
+    {key:'alarm', label:'Door and alarm code', sub:'for after-hours cleaning'},
+    {key:'building', label:'Building manager or front desk'},
+    {key:'coordinate', label:"We'll coordinate by phone"},
+  ];
+  const PETS = [
+    {key:'dog', label:'Dog(s)'},
+    {key:'cat', label:'Cat(s)'},
+    {key:'other', label:'Other pet'},
+    {key:'none', label:'No pets'},
+  ];
+  const PRIORITIES = [
+    {key:'kitchen', label:'Kitchen'},
+    {key:'bathrooms', label:'Bathrooms'},
+    {key:'bedrooms', label:'Bedrooms'},
+    {key:'living', label:'Living / common areas'},
+    {key:'floors', label:'Floors & baseboards'},
+    {key:'dusting', label:'Dusting & surfaces'},
+    {key:'windowsglass', label:'Windows & glass'},
+    {key:'other', label:'Other'},
+  ];
+  const BUSINESS_PRIORITIES = [
+    {key:'lobby', label:'Front desk / lobby'},
+    {key:'workstations', label:'Desks & workstations'},
+    {key:'restrooms', label:'Restrooms'},
+    {key:'breakroom', label:'Break room / kitchenette'},
+    {key:'floors', label:'Floors'},
+    {key:'windowsglass', label:'Windows & glass'},
+    {key:'trash', label:'Trash & recycling'},
+    {key:'other', label:'Other'},
+  ];
+  const PRODUCTS = [
+    {key:'standard', label:'Use your standard supplies'},
+    {key:'ownproducts', label:"I'll leave my own products out"},
+  ];
+  const SCENTS = [
+    {key:'nopref', label:'No preference'},
+    {key:'fresh', label:'Fresh / clean scent'},
+    {key:'citrus', label:'Citrus'},
+    {key:'lavender', label:'Lavender'},
+    {key:'unscented', label:'Unscented / fragrance-free'},
+  ];
+  const DAYS = [
+    {key:'sat', label:'Saturday'},
+    {key:'sun', label:'Sunday'},
+    {key:'either', label:'Either works'},
+  ];
+  const STATES = [
+    {key:'nj', label:'New Jersey'},
+    {key:'ny', label:'New York City'},
+  ];
+
+  function radioCards(container, name, items, defaultKey, subKeyFn){
+    container.innerHTML = items.map((it,i)=>{
+      const id = name+'-'+it.key;
+      const checked = it.key === defaultKey ? 'checked' : '';
+      const sub = subKeyFn ? subKeyFn(it) : (it.sub || '');
+      return `<div class="opt">
+        <input type="radio" name="${name}" id="${id}" value="${it.key}" ${checked}>
+        <label for="${id}"><span class="opt-title">${it.label}</span>${sub ? `<span class="opt-sub">${sub}</span>` : ''}</label>
+      </div>`;
+    }).join('');
+  }
+
+  function checkCards(container, items, gridClass){
+    container.className = gridClass || 'addon-grid';
+    container.innerHTML = items.map(it=>{
+      const id = 'chk-'+it.key;
+      return `<div class="addon">
+        <input type="checkbox" id="${id}" data-key="${it.key}">
+        <label for="${id}"><span>${it.label}</span></label>
+      </div>`;
+    }).join('');
+  }
+
+  radioCards(document.getElementById('homeSizeGroup'), 'homeSize', HOMES, '3b2b', h => h.sqft+' sq ft approx.');
+  radioCards(document.getElementById('frequencyGroup'), 'frequency', FREQS, 'biweekly');
+  checkCards(document.getElementById('addonGrid'), ADDONS);
+  radioCards(document.getElementById('bizTypeGroup'), 'bizType', BIZ_TYPES, 'office');
+  radioCards(document.getElementById('accessGroup'), 'access', ACCESS, 'home');
+  checkCards(document.getElementById('petsGrid'), PETS);
+  checkCards(document.getElementById('priorityGrid'), PRIORITIES);
+  radioCards(document.getElementById('productsGroup'), 'products', PRODUCTS, 'standard');
+  radioCards(document.getElementById('scentGroup'), 'scent', SCENTS, 'nopref');
+  // day and state use the .pill markup instead of .opt
+  function pillGroup(id, name, items, defaultKey){
+    const el = document.getElementById(id);
+    el.className = 'pillgroup';
+    el.innerHTML = items.map(it=>{
+      const checked = it.key===defaultKey ? 'checked' : '';
+      return `<div class="pill"><input type="radio" name="${name}" id="${name}-${it.key}" value="${it.key}" ${checked}><label for="${name}-${it.key}">${it.label}</label></div>`;
+    }).join('');
+  }
+  pillGroup('dayGroup', 'day', DAYS, 'either');
+  pillGroup('stateGroup', 'state', STATES, 'nj');
+
+  const svcResRadio = document.getElementById('svc-res');
+  const blockRes = document.getElementById('block-residential');
+  const blockCom = document.getElementById('block-commercial');
+
+  function selectedRadio(name){
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : null;
+  }
+  function checkedKeys(container){
+    return Array.from(container.querySelectorAll('input[type=checkbox]:checked')).map(i=>i.dataset.key);
+  }
+
+  function buildResidentialRecap(){
+    const home = HOMES.find(h=>h.key===selectedRadio('homeSize'));
+    const freqKey = selectedRadio('frequency');
+    const needsExtra = document.getElementById('needsExtra').checked;
+    const addonKeys = checkedKeys(document.getElementById('addonGrid'));
+    const addons = ADDONS.filter(a=>addonKeys.includes(a.key));
+    const freqLabel = FREQS.find(f=>f.key===freqKey).label;
+
+    const rows = [{label:'Home', value: home.label}];
+    let headline = home.label + ' — ';
+
+    if(freqKey==='onetime'){
+      rows.push({label:'Service', value: needsExtra ? 'One-time clean, needs extra attention' : 'Standard clean, one time'});
+      headline += 'one-time';
+    } else if(freqKey==='deep'){
+      rows.push({label:'Service', value:'Deep clean'});
+      headline += 'deep clean';
+    } else if(freqKey==='movein'){
+      rows.push({label:'Service', value:'Move-in / move-out clean'});
+      headline += 'move-in / move-out';
+    } else {
+      rows.push({label:'Service', value: freqLabel + ', starting with a deep clean'});
+      headline += freqLabel.toLowerCase();
+    }
+
+    if(addons.length) rows.push({label:'Add-ons', value: addons.map(a=>a.label).join(', ')});
+
+    return { headline, rows, addons };
+  }
+
+  function renderRecap(headline, rows, footnote){
+    document.getElementById('sumHeadline').textContent = headline;
+    let html = rows.map(r =>
+      `<div class="price-line recap-row"><span class="plabel">${r.label}</span><span class="pval recap">${r.value}</span></div>`
+    ).join('');
+    html += `<hr class="rule">`;
+    html += `<div class="footnote">${footnote}</div>`;
+    document.getElementById('sumBody').innerHTML = html;
+  }
+
+  function renderResidentialSummary(){
+    const recap = buildResidentialRecap();
+    renderRecap(recap.headline, recap.rows,
+      "Send us your details and we'll reply with your quote, usually within one business day. Prices depend on the size and condition of the home, so we'd rather look at yours than guess.");
+  }
+
+  function renderCommercialSummary(){
+    const bizType = BIZ_TYPES.find(b=>b.key===selectedRadio('bizType'));
+    const sqft = document.getElementById('bizSqft').value;
+    const freq = document.getElementById('bizFreq').value;
+    const freqLabel = {weekly:'Weekly', biweekly:'Bi-weekly', monthly:'Monthly', onetime:'One-time clean'}[freq] || freq;
+
+    const rows = [{label:'Space', value: bizType ? bizType.label : '—'}];
+    if(sqft) rows.push({label:'Size', value:'~' + sqft + ' sq ft'});
+    if(freq) rows.push({label:'Frequency', value: freqLabel});
+
+    renderRecap((bizType ? bizType.label : 'Business') + ' — quote request', rows,
+      "Business jobs are quoted after a short walkthrough. Send us your details and we'll follow up to set it up, usually within one business day.");
+  }
+
+  function currentServiceType(){ return selectedRadio('serviceType'); }
+
+  let lastSvcType = null;
+
+  function refresh(){
+    const svc = currentServiceType();
+    blockRes.style.display = svc==='residential' ? '' : 'none';
+    blockCom.style.display = svc==='commercial' ? '' : 'none';
+
+    if(svc !== lastSvcType){
+      const isBusiness = svc === 'commercial';
+      document.getElementById('petsSection').style.display = isBusiness ? 'none' : '';
+      checkCards(document.getElementById('priorityGrid'), isBusiness ? BUSINESS_PRIORITIES : PRIORITIES);
+      radioCards(document.getElementById('accessGroup'), 'access',
+        isBusiness ? BUSINESS_ACCESS : ACCESS,
+        isBusiness ? 'staff' : 'home');
+      lastSvcType = svc;
+    }
+
+    if(svc==='residential') renderResidentialSummary(); else renderCommercialSummary();
+    document.getElementById('stateNote').textContent = selectedRadio('state')==='ny'
+      ? "We serve New York City too — tell us your neighborhood and we'll confirm we can get to you."
+      : '';
+    updateActionState();
+  }
+
+  document.body.addEventListener('input', refresh);
+  document.body.addEventListener('change', refresh);
+
+  function buildPlainTextSummary(){
+    const svc = currentServiceType();
+    const name = document.getElementById('cName').value.trim();
+    const phone = document.getElementById('cPhone').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    const town = document.getElementById('cTown').value.trim();
+    const state = STATES.find(s=>s.key===selectedRadio('state'));
+    const day = DAYS.find(d=>d.key===selectedRadio('day'));
+
+    let lines = [];
+    lines.push('Turtle Cleaning Services — quote request');
+    lines.push('');
+    lines.push('CONTACT');
+    lines.push('Name: ' + (name || '—'));
+    lines.push('Phone: ' + (phone || '—'));
+    if(email) lines.push('Email: ' + email);
+    lines.push('Location: ' + (town || '—') + (state ? ', ' + state.label : ''));
+    lines.push('Preferred day: ' + (day ? day.label : '—'));
+    lines.push('');
+
+    if(svc==='residential'){
+      const recap = buildResidentialRecap();
+      lines.push('SERVICE: ' + recap.headline);
+      recap.rows.forEach(r=> lines.push('  ' + r.label + ': ' + r.value));
+    } else {
+      const bizType = BIZ_TYPES.find(b=>b.key===selectedRadio('bizType'));
+      const sqft = document.getElementById('bizSqft').value;
+      const freq = document.getElementById('bizFreq').value;
+      lines.push('SERVICE: Commercial — ' + (bizType ? bizType.label : '—'));
+      lines.push('  Approx. sq ft: ' + (sqft || '—'));
+      lines.push('  Desired frequency: ' + (freq || '—'));
+    }
+    lines.push('');
+    lines.push('HOW I LIKE IT DONE');
+    const accessList = svc==='commercial' ? BUSINESS_ACCESS : ACCESS;
+    const access = accessList.find(a=>a.key===selectedRadio('access'));
+    lines.push('Getting in: ' + (access ? access.label : '—'));
+    if(svc==='residential'){
+      const pets = checkedKeys(document.getElementById('petsGrid')).map(k=>PETS.find(p=>p.key===k).label);
+      if(pets.length) lines.push('Pets: ' + pets.join(', '));
+      const petsNote = document.getElementById('petsNote').value.trim();
+      if(petsNote) lines.push('Pet notes: ' + petsNote);
+    }
+    const priorityList = svc==='commercial' ? BUSINESS_PRIORITIES : PRIORITIES;
+    const priorities = checkedKeys(document.getElementById('priorityGrid')).map(k=>{
+      const found = priorityList.find(p=>p.key===k);
+      return found ? found.label : k;
+    });
+    if(priorities.length) lines.push('Extra care in: ' + priorities.join(', '));
+    const priorityOther = document.getElementById('priorityOtherNote').value.trim();
+    if(priorityOther) lines.push('Extra care, other: ' + priorityOther);
+    const products = PRODUCTS.find(p=>p.key===selectedRadio('products'));
+    lines.push('Products: ' + (products ? products.label : '—'));
+    const scent = SCENTS.find(s=>s.key===selectedRadio('scent'));
+    lines.push('Fragrance: ' + (scent ? scent.label : '—'));
+    const scentNote = document.getElementById('scentNote').value.trim();
+    if(scentNote) lines.push('Fragrance notes: ' + scentNote);
+    const avoid = document.getElementById('avoidNote').value.trim();
+    if(avoid) lines.push('Off-limits: ' + avoid);
+    const other = document.getElementById('otherNote').value.trim();
+    if(other) lines.push('Other notes: ' + other);
+    return lines.join('\n');
+  }
+
+  const WHATSAPP_NUMBER = '19088805716';
+  const TURTLE_EMAIL = 'managturtlecs@gmail.com';
+
+  // Neither email route works for everyone: mailto: needs a mail app registered on
+  // the device, and Gmail's web compose needs an active Google session (an incognito
+  // window or a non-Gmail user gets bounced to a marketing page, losing the message).
+  // So both are offered, labelled, and the client picks the one they actually have.
+
+  // A mailto: handler truncates past roughly 2048 chars; an https URL carries far more.
+  const MAILTO_MAX = 1900;
+  const URL_MAX = 7000;
+
+  function buildWhatsappUrl(){
+    return 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(buildPlainTextSummary());
+  }
+
+  function emailSubject(){
+    return 'Quote request — ' + document.getElementById('cName').value.trim();
+  }
+
+  function buildMailtoUrl(){
+    return 'mailto:' + TURTLE_EMAIL
+      + '?subject=' + encodeURIComponent(emailSubject())
+      + '&body=' + encodeURIComponent(buildPlainTextSummary());
+  }
+
+  function buildGmailUrl(){
+    return 'https://mail.google.com/mail/?view=cm&fs=1'
+      + '&to=' + encodeURIComponent(TURTLE_EMAIL)
+      + '&su=' + encodeURIComponent(emailSubject())
+      + '&body=' + encodeURIComponent(buildPlainTextSummary());
+  }
+
+  function updateActionState(){
+    const ok = document.getElementById('cName').value.trim() && document.getElementById('cPhone').value.trim();
+    const waLink = document.getElementById('btnWhatsapp');
+    const mailLink = document.getElementById('btnEmail');
+    const gmailLink = document.getElementById('btnGmail');
+    const lengthWarning = document.getElementById('lengthWarning');
+    document.getElementById('btnCopy').disabled = !ok;
+
+    const waUrl = ok ? buildWhatsappUrl() : '';
+    const mailUrl = ok ? buildMailtoUrl() : '';
+    const gmailUrl = ok ? buildGmailUrl() : '';
+    // Judged separately: one route being too long to carry the notes says nothing
+    // about the others, and disabling all three would strand the client.
+    const waOk = ok && waUrl.length <= URL_MAX;
+    const mailOk = ok && mailUrl.length <= MAILTO_MAX;
+    const gmailOk = ok && gmailUrl.length <= URL_MAX;
+
+    [[waLink, waUrl, waOk], [mailLink, mailUrl, mailOk], [gmailLink, gmailUrl, gmailOk]].forEach(([link, url, live])=>{
+      if(live){ link.href = url; } else { link.removeAttribute('href'); }
+      link.classList.toggle('is-disabled', !live);
+    });
+
+    lengthWarning.hidden = !(ok && !(waOk && mailOk && gmailOk));
+  }
+
+  async function copyDetails(){
+    const text = buildPlainTextSummary();
+    const note = document.getElementById('copyOk');
+    try{
+      await navigator.clipboard.writeText(text);
+      note.textContent = 'Copied — paste it into a text or email.';
+    }catch(e){
+      note.textContent = 'Could not copy automatically — select the text manually.';
+    }
+    setTimeout(()=>{ note.textContent=''; }, 4000);
+  }
+
+  document.getElementById('btnCopy').addEventListener('click', copyDetails);
+  document.getElementById('btnLengthCopy').addEventListener('click', copyDetails);
+
+  refresh();
+})();
+</script>
