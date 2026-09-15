@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Turtle Quote Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --forest:#3D5E33; --forest-dark:#2E4726; --sage:#DDE8C0; --sage-tint:#F1F5E7;
+    --ink:#262B21; --bg:#F5F6F0; --surface:#FFFFFF; --border:#DFE2D4; --border-strong:#BFC6B0;
+    --muted:#6B6F62; --ok:#2E6B3E; --ok-bg:#E4F1E4;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --forest:#8FC46E; --forest-dark:#6FA352; --sage:#3A4530; --sage-tint:#232A1C;
+      --ink:#ECEFE4; --bg:#161A12; --surface:#1F2419; --border:#333B27; --border-strong:#47512F;
+      --muted:#9AA189; --ok:#9BD6A2; --ok-bg:#20301F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --forest:#8FC46E; --forest-dark:#6FA352; --sage:#3A4530; --sage-tint:#232A1C;
+    --ink:#ECEFE4; --bg:#161A12; --surface:#1F2419; --border:#333B27; --border-strong:#47512F;
+    --muted:#9AA189; --ok:#9BD6A2; --ok-bg:#20301F;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif;
+    padding:0 14px 40px;
+  }
+  .wrap{ max-width:620px; margin:0 auto; }
+
+  header{ padding:18px 0 12px; }
+  header h1{ margin:0; font-size:17px; font-weight:700; }
+  header .sub{ font-size:12px; color:var(--muted); margin-top:3px; }
+
+  .tabs{ display:flex; gap:8px; margin-bottom:14px; }
+  .tabs button{
+    flex:1; font:inherit; font-size:14px; font-weight:600; padding:11px 8px;
+    border-radius:10px; border:1.5px solid var(--border-strong);
+    background:var(--surface); color:var(--ink); cursor:pointer;
+  }
+  .tabs button[aria-selected="true"]{ background:var(--forest); border-color:var(--forest); color:#fff; }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; }
+  .lbl{ font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .grid{ display:grid; gap:7px; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); }
+  .opt{ position:relative; }
+  .opt input{ position:absolute; opacity:0; inset:0; margin:0; cursor:pointer; }
+  .opt label{
+    display:block; text-align:center; padding:11px 8px; border-radius:9px;
+    border:1.5px solid var(--border-strong); font-size:13.5px; font-weight:500; cursor:pointer;
+  }
+  .opt input:checked + label{ background:var(--sage-tint); border-color:var(--forest); box-shadow:inset 0 0 0 1px var(--forest); font-weight:600; }
+  .opt input:focus-visible + label{ outline:2px solid var(--forest); outline-offset:2px; }
+
+  .addons{ display:grid; gap:6px; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); }
+  .addon{ display:flex; align-items:center; gap:8px; border:1.5px solid var(--border); border-radius:9px; padding:9px 11px; }
+  .addon input{ width:17px; height:17px; accent-color:var(--forest); flex:none; }
+  .addon label{ font-size:13px; display:flex; justify-content:space-between; flex:1; gap:8px; cursor:pointer; }
+  .addon .p{ color:var(--muted); font-variant-numeric:tabular-nums; }
+
+  input[type=text], input[type=tel], input[type=email], input[type=number], select{
+    font:inherit; font-size:15px; width:100%; padding:10px 12px;
+    border:1.5px solid var(--border-strong); border-radius:9px;
+    background:var(--surface); color:var(--ink);
+  }
+  input:focus, select:focus{ outline:2px solid var(--forest); outline-offset:1px; }
+  .row{ display:grid; gap:10px; grid-template-columns:1fr 1fr; }
+  @media (max-width:430px){ .row{ grid-template-columns:1fr; } }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field .cap{ font-size:12px; font-weight:600; color:var(--muted); }
+
+  .result{ background:var(--forest); color:#fff; border-radius:12px; padding:18px; margin-bottom:14px; }
+  .result .what{ font-size:13px; opacity:.9; }
+  .result .big{ font-size:34px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.15; margin-top:4px; }
+  .result .big small{ font-size:15px; font-weight:500; opacity:.85; }
+  .result .second{ margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,.25); font-size:14px; display:flex; justify-content:space-between; gap:12px; }
+  .result .second b{ font-variant-numeric:tabular-nums; }
+
+  .chip{ font-size:12.5px; line-height:1.45; padding:9px 12px; border-radius:9px; background:var(--ok-bg); color:var(--ok); margin-bottom:14px; }
+
+  .msg{
+    width:100%; font:inherit; font-size:13px; line-height:1.5; padding:12px;
+    border:1.5px solid var(--border-strong); border-radius:9px; background:var(--bg); color:var(--ink);
+    min-height:150px; resize:vertical;
+  }
+  .send{ display:grid; gap:8px; grid-template-columns:1fr 1fr; margin-top:10px; }
+  @media (max-width:430px){ .send{ grid-template-columns:1fr; } }
+  .btn{
+    font:inherit; font-size:14px; font-weight:600; padding:12px; border-radius:9px;
+    border:1.5px solid transparent; cursor:pointer; text-align:center; text-decoration:none;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+  }
+  .btn-wa{ background:var(--forest); color:#fff; }
+  .btn-mail{ background:var(--surface); border-color:var(--border-strong); color:var(--ink); }
+  .btn-copy{ background:var(--sage-tint); border-color:var(--forest); color:var(--forest-dark); grid-column:1 / -1; }
+  .btn.is-off{ opacity:.45; pointer-events:none; }
+  .btn:focus-visible{ outline:2px solid var(--forest); outline-offset:2px; }
+  .note{ font-size:11.5px; color:var(--muted); margin-top:8px; line-height:1.5; text-align:center; }
+  .note code{ font-size:11px; background:var(--sage-tint); padding:1px 4px; border-radius:4px; }
+  .linkg{ color:var(--forest-dark); font-weight:600; text-decoration:underline; }
+  .linkg.is-off{ opacity:.45; pointer-events:none; }
+  .copied{ font-size:12px; color:var(--forest-dark); text-align:center; height:15px; margin-top:5px; }
+  footer{ font-size:11px; color:var(--muted); text-align:center; padding-top:8px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Quote Tool</h1>
+    <div class="sub">Build the price and the client message in one place.</div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button id="tab-res" role="tab" aria-selected="true" onclick="setTipo('res')">Home</button>
+    <button id="tab-com" role="tab" aria-selected="false" onclick="setTipo('com')">Business</button>
+  </div>
+
+  <div id="panel-res">
+    <div class="card"><div class="lbl">Size</div><div class="grid" id="gHome"></div></div>
+    <div class="card"><div class="lbl">Service</div><div class="grid" id="gServ"></div></div>
+    <div class="card"><div class="lbl">Add-ons</div><div class="addons" id="gAdd"></div></div>
+  </div>
+
+  <div id="panel-com" hidden>
+    <div class="card"><div class="lbl">Type</div><div class="grid" id="gBiz"></div></div>
+    <div class="card">
+      <div class="row">
+        <div class="field">
+          <span class="cap">Square feet</span>
+          <input type="number" id="sqft" min="0" step="100" value="2000" inputmode="numeric">
+        </div>
+        <div class="field">
+          <span class="cap">Frequency</span>
+          <select id="comFreq">
+            <option value="4.33">Weekly</option>
+            <option value="2.17">Bi-weekly</option>
+            <option value="1">Monthly</option>
+            <option value="0">One-time</option>
+          </select>
+        </div>
+      </div>
+      <div class="note" style="text-align:left;margin-top:10px;">Business pricing is confirmed after a walkthrough of the space.</div>
+    </div>
+  </div>
+
+  <div class="result" id="result"></div>
+  <div class="chip" id="chip" hidden></div>
+
+  <div class="card">
+    <div class="lbl">Message to the client</div>
+    <div class="field" style="margin-bottom:10px;">
+      <span class="cap">Client name</span>
+      <input type="text" id="cliNombre" placeholder="optional">
+    </div>
+
+    <textarea class="msg" id="msg" spellcheck="false"></textarea>
+    <div class="note" style="text-align:left;">Edit it before sending; whatever is in this box is what goes out. Note: changing an option above regenerates the message and drops your edit.</div>
+
+    <div class="row" style="margin-top:12px;">
+      <div class="field">
+        <span class="cap">Client WhatsApp</span>
+        <input type="tel" id="cliTel" placeholder="9085551234" inputmode="tel">
+      </div>
+      <div class="field">
+        <span class="cap">Client email</span>
+        <input type="email" id="cliMail" placeholder="optional">
+      </div>
+    </div>
+
+    <div class="send">
+      <a class="btn btn-wa is-off" id="bWa" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-mail is-off" id="bMail" rel="noopener">Email</a>
+      <button class="btn btn-copy" id="bCopy" type="button">Copy message</button>
+    </div>
+    <div class="copied" id="copiado"></div>
+    <div class="note">
+      On a computer the Email button may open nothing, when Windows hands the <code>mailto:</code> to a browser with no mail service set up.
+      Use <a class="linkg is-off" id="bGmail" target="_blank" rel="noopener">Gmail in the browser</a> there. On the phone the button works.
+    </div>
+    <div class="note" id="notaEnvio"></div>
+  </div>
+
+  <footer>Turtle Cleaning Services · (908) 880-5716</footer>
+</div>
+
+<script>
+(function(){
+  // Final Rate Card prices (verified 2026-09-15).
+  // Written as literals, never derived: the cost formula does not get published.
+  const HOMES=[
+    {k:'h1', n:'Studio / 1BR 1BA', cli:'Studio / 1 bed, 1 bath',
+     std:175, deep:280, move:315, weekly:140, biweekly:150, monthly:165},
+    {k:'h2', n:'2BR 1BA', cli:'2 bed, 1 bath',
+     std:200, deep:315, move:355, weekly:160, biweekly:170, monthly:185},
+    {k:'h3', n:'2BR 2BA', cli:'2 bed, 2 bath',
+     std:220, deep:350, move:395, weekly:175, biweekly:190, monthly:205},
+    {k:'h4', n:'3BR 2BA', cli:'3 bed, 2 bath',
+     std:245, deep:390, move:435, weekly:195, biweekly:205, monthly:225},
+    {k:'h5', n:'4BR 2.5BA', cli:'4 bed, 2.5 bath',
+     std:290, deep:460, move:515, weekly:230, biweekly:245, monthly:265},
+    {k:'h6', n:'4BR 3BA', cli:'4 bed, 3 bath',
+     std:330, deep:530, move:595, weekly:265, biweekly:285, monthly:320},
+  ];
+  const SERVS=[
+    {k:'std',      n:'One-time',   cli:'One-time standard clean'},
+    {k:'deep',     n:'Deep clean', cli:'Deep clean'},
+    {k:'move',     n:'Move-out',   cli:'Move-in / move-out clean'},
+    {k:'weekly',   n:'Weekly',     cli:'Weekly'},
+    {k:'biweekly', n:'Bi-weekly',  cli:'Bi-weekly'},
+    {k:'monthly',  n:'Monthly',    cli:'Monthly'},
+  ];
+  const ADDONS=[
+    {k:'oven',   p:40, n:'Oven',       cli:'Inside oven'},
+    {k:'fridge', p:40, n:'Fridge',     cli:'Inside fridge'},
+    {k:'win',    p:60, n:'Windows',    cli:'Interior windows'},
+    {k:'cab',    p:70, n:'Cabinets',   cli:'Inside cabinets'},
+    {k:'base',   p:45, n:'Baseboards', cli:'Baseboards'},
+    {k:'wd',     p:40, n:'Washer',     cli:'Washer / dryer'},
+  ];
+  const BIZ=[
+    {k:'office', n:'Office', rate:0.12, cli:'office'},
+    {k:'retail', n:'Retail', rate:0.14, cli:'retail store'},
+  ];
+  const MIN_VISIT=175, STEP=5;
+  const up5 = x => Math.ceil(x/STEP)*STEP;
+  const money = n => '$' + Math.round(n).toLocaleString('en-US');
+
+  let tipo='res';
+
+  const radios=(cont,name,items,def)=>{
+    document.getElementById(cont).innerHTML = items.map(it=>
+      `<div class="opt"><input type="radio" name="${name}" id="${name}-${it.k}" value="${it.k}" ${it.k===def?'checked':''}>
+       <label for="${name}-${it.k}">${it.n}</label></div>`).join('');
+  };
+  radios('gHome','home',HOMES,'h4');
+  radios('gServ','serv',SERVS,'biweekly');
+  radios('gBiz','biz',BIZ,'office');
+  document.getElementById('gAdd').innerHTML = ADDONS.map(a=>
+    `<div class="addon"><input type="checkbox" id="a-${a.k}" data-k="${a.k}">
+     <label for="a-${a.k}"><span>${a.n}</span><span class="p">$${a.p}</span></label></div>`).join('');
+
+  const sel = n => (document.querySelector(`input[name="${n}"]:checked`)||{}).value;
+
+  window.setTipo = t => {
+    tipo=t;
+    document.getElementById('panel-res').hidden = t!=='res';
+    document.getElementById('panel-com').hidden = t!=='com';
+    document.getElementById('tab-res').setAttribute('aria-selected', t==='res');
+    document.getElementById('tab-com').setAttribute('aria-selected', t==='com');
+    calcular();
+  };
+
+  function calcResidencial(){
+    const home = HOMES.find(x=>x.k===sel('home'));
+    const serv = SERVS.find(x=>x.k===sel('serv'));
+    const adds = ADDONS.filter(a=>document.getElementById('a-'+a.k).checked);
+    const sumaAdd = adds.reduce((s,a)=>s+a.p,0);
+    const recurrente = ['weekly','biweekly','monthly'].includes(serv.k);
+
+    let precio, etiqueta, segundo=null;
+    if(recurrente){
+      // A recurring client's first visit is always billed as a deep clean.
+      precio = home.deep; etiqueta = 'First visit (deep clean)';
+      segundo = {label:'Then every visit ('+serv.n.toLowerCase()+')', valor:home[serv.k]};
+    } else {
+      precio = home[serv.k];
+      etiqueta = serv.n;
+    }
+    return {home, serv, adds, sumaAdd, precio, etiqueta, segundo, recurrente};
+  }
+
+  function calcComercial(){
+    const biz = BIZ.find(x=>x.k===sel('biz'));
+    const sqft = Math.max(0, parseFloat(document.getElementById('sqft').value)||0);
+    const porArea = sqft*biz.rate;
+    const precio = up5(Math.max(porArea, MIN_VISIT));
+    const visitasMes = parseFloat(document.getElementById('comFreq').value)||0;
+    return {biz, sqft, precio, porArea, visitasMes};
+  }
+
+  function armarMensaje(d){
+    const nom = document.getElementById('cliNombre').value.trim();
+    let t=[];
+    t.push((nom?`Hi ${nom}, `:'Hi, ') + "here's your quote from Turtle Cleaning Services:");
+    t.push('');
+    if(tipo==='res'){
+      t.push(d.home.cli + ' — ' + d.serv.cli);
+      t.push('');
+      if(d.segundo){
+        t.push('First visit (deep clean): ' + money(d.precio + d.sumaAdd));
+        t.push('Then every visit: ' + money(d.segundo.valor));
+      } else {
+        t.push('Total: ' + money(d.precio + d.sumaAdd));
+      }
+      if(d.adds.length){
+        t.push('');
+        t.push('Includes: ' + d.adds.map(a=>a.cli+' ('+money(a.p)+')').join(', '));
+      }
+      t.push('');
+      t.push('This is for a home in normal condition and gets confirmed once we see the space.');
+      t.push('We work weekends.');
+    } else {
+      t.push(d.biz.cli + ' — ' + d.sqft.toLocaleString('en-US') + ' sq ft');
+      t.push('Per visit: ' + money(d.precio));
+      if(d.visitasMes>0) t.push('Monthly estimate: ' + money(d.precio*d.visitasMes));
+      t.push('');
+      t.push('We confirm the final price after a short walkthrough of the space.');
+    }
+    t.push('');
+    t.push('Turtle Cleaning Services · (908) 880-5716');
+    return t.join('\n');
+  }
+
+  function calcular(){
+    const d = tipo==='res' ? calcResidencial() : calcComercial();
+    const chip = document.getElementById('chip');
+    let html;
+
+    if(tipo==='res'){
+      const total = d.precio + d.sumaAdd;
+      html = `<div class="what">${d.home.n} · ${d.etiqueta}${d.sumaAdd?` · add-ons ${money(d.sumaAdd)}`:''}</div>
+              <div class="big">${money(total)}</div>`;
+      if(d.segundo) html += `<div class="second"><span>${d.segundo.label}</span><b>${money(d.segundo.valor)}</b></div>`;
+      chip.hidden = !d.recurrente;
+      if(d.recurrente) chip.textContent = 'First visit billed as a deep clean, per the Plan de Arranque rule.';
+    } else {
+      html = `<div class="what">${d.biz.n} · ${d.sqft.toLocaleString('en-US')} sq ft</div>
+              <div class="big">${money(d.precio)} <small>per visit</small></div>`;
+      if(d.visitasMes>0) html += `<div class="second"><span>Per month (${d.visitasMes} visits)</span><b>${money(d.precio*d.visitasMes)}</b></div>`;
+      const pisoManda = d.porArea < MIN_VISIT;
+      chip.hidden = !pisoManda;
+      if(pisoManda) chip.textContent = `By area this would be ${money(d.porArea)}; the ${money(MIN_VISIT)} minimum visit wins.`;
+    }
+    document.getElementById('result').innerHTML = html;
+    document.getElementById('msg').value = armarMensaje(d);
+    actualizarEnvio();
+  }
+
+  const soloDigitos = s => (s||'').replace(/\D/g,'');
+
+  function actualizarEnvio(){
+    const texto = document.getElementById('msg').value;
+    const tel = soloDigitos(document.getElementById('cliTel').value);
+    const mail = document.getElementById('cliMail').value.trim();
+    const wa = document.getElementById('bWa');
+    const ml = document.getElementById('bMail');
+    const gm = document.getElementById('bGmail');
+
+    let num = tel;
+    if(num.length===10) num = '1'+num;
+    const waOk = num.length>=11 && texto.trim().length>0;
+    if(waOk) wa.href = 'https://wa.me/'+num+'?text='+encodeURIComponent(texto);
+    else wa.removeAttribute('href');
+    wa.classList.toggle('is-off', !waOk);
+
+    const mailOk = /.+@.+\..+/.test(mail) && texto.trim().length>0;
+    const asunto = 'Turtle Cleaning Services';
+    if(mailOk){
+      // Address goes unencoded: an escaped @ breaks some mail clients.
+      ml.href = 'mailto:'+mail+'?subject='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(texto);
+      gm.href = 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(mail)
+              + '&su='+encodeURIComponent(asunto)+'&body='+encodeURIComponent(texto);
+    } else { ml.removeAttribute('href'); gm.removeAttribute('href'); }
+    ml.classList.toggle('is-off', !mailOk);
+    gm.classList.toggle('is-off', !mailOk);
+
+    const faltan=[];
+    if(!tel) faltan.push('the WhatsApp number');
+    if(!mail) faltan.push('the email');
+    document.getElementById('notaEnvio').textContent = faltan.length===2
+      ? "Enter the client's WhatsApp or email to enable sending. Copy always works."
+      : (faltan.length===1 ? 'Missing '+faltan[0]+' if you want that button.' : '');
+  }
+
+  document.getElementById('bCopy').addEventListener('click', async ()=>{
+    const n = document.getElementById('copiado');
+    try{
+      await navigator.clipboard.writeText(document.getElementById('msg').value);
+      n.textContent='Copied. Paste it into the client chat.';
+    }catch(e){
+      const t=document.getElementById('msg'); t.select(); t.setSelectionRange(0,99999);
+      n.textContent='Select it and copy by hand.';
+    }
+    setTimeout(()=>{ n.textContent=''; }, 4000);
+  });
+
+  document.body.addEventListener('change', e=>{ if(e.target.id!=='msg') calcular(); });
+  document.body.addEventListener('input', e=>{
+    if(e.target.id==='msg'){ actualizarEnvio(); return; }
+    if(['cliTel','cliMail'].includes(e.target.id)){ actualizarEnvio(); return; }
+    calcular();
+  });
+
+  calcular();
+})();
+</script>
+</body>
+</html>
