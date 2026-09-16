@@ -759,6 +759,21 @@
   document.body.addEventListener('input', refresh);
   document.body.addEventListener('change', refresh);
 
+  // Some mail apps mangle any non-ASCII character inside a mail link: a real
+  // request sent from the Yahoo Mail app came in with every em dash turned into
+  // broken bytes. So the text that leaves the page is plain ASCII. Only
+  // typographic punctuation is swapped (phone keyboards type curly quotes on
+  // their own); letters with accents are left alone, since mangling a name is
+  // worse than risking it.
+  function plainAscii(text){
+    return text
+      .replace(/[\u2012-\u2015\u2212]/g, '-')
+      .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
+      .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+      .replace(/\u2026/g, '...')
+      .replace(/[\u00A0\u2007\u202F]/g, ' ');
+  }
+
   function buildPlainTextSummary(){
     const svc = currentServiceType();
     const name = document.getElementById('cName').value.trim();
@@ -820,7 +835,7 @@
     if(avoid) lines.push('Off-limits: ' + avoid);
     const other = document.getElementById('otherNote').value.trim();
     if(other) lines.push('Other notes: ' + other);
-    return lines.join('\n');
+    return plainAscii(lines.join('\n'));
   }
 
   const WHATSAPP_NUMBER = '19088805716';
@@ -845,7 +860,7 @@
   }
 
   function emailSubject(){
-    return 'Quote request — ' + document.getElementById('cName').value.trim();
+    return plainAscii('Quote request - ' + document.getElementById('cName').value.trim());
   }
 
   function buildMailtoUrl(){
