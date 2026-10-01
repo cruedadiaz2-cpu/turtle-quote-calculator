@@ -17,6 +17,12 @@ Three routes because none of them works for everyone: `mailto:` needs a mail app
 registered on the device, and Gmail web needs an active Google session. Each is
 length-checked on its own, and **Copy details** is the fallback that always works.
 
+Every request names where the visitor came from. The form adds a `Source:` line and the
+WhatsApp buttons on `/links/` and `/chat/` add `(via Instagram)`, `(via Facebook)` or
+`(via Google)` to the greeting. The source comes from `?src=` (only `instagram`, `ig`,
+`facebook`, `fb`, `google`), then the Instagram or Facebook in-app browser, then the
+referrer. With no known source nothing is added.
+
 No prices live in this page. Quotes are sent by reply — deliberately, so nothing
 in the page source reveals the rate card.
 

@@ -28,7 +28,38 @@
   <p><a id="wa" href="https://wa.me/19088805716?text=Hi%20Turtle%20Cleaning%20Services%2C%20I%27d%20like%20more%20information%20about%20your%20cleaning%20services%20and%20a%20free%20quote%2E">Tap here if it does not open by itself</a></p>
 </main>
 <script>
-  location.replace(document.getElementById('wa').href);
+(function(){
+  // Where did this visitor come from? Every request should name its source.
+  // 1) an explicit ?src= (known values only, so a crafted link cannot inject text),
+  // 2) the Instagram or Facebook in-app browser, 3) the referrer.
+  function turtleSource(){
+    var KNOWN = { instagram:'Instagram', ig:'Instagram', facebook:'Facebook', fb:'Facebook', google:'Google' };
+    var m = /[?&]src=([^&#]*)/.exec(location.search);
+    var p = '';
+    try { p = m ? decodeURIComponent(m[1]).toLowerCase() : ''; } catch(e){}
+    if(KNOWN.hasOwnProperty(p)) return KNOWN[p];
+    var ua = navigator.userAgent || '';
+    if(/Instagram/i.test(ua)) return 'Instagram';
+    if(/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua)) return 'Facebook';
+    var host = '';
+    try { host = new URL(document.referrer).hostname; } catch(e){}
+    if(/(^|\.)instagram\.com$/i.test(host)) return 'Instagram';
+    if(/(^|\.)(facebook\.com|fb\.me|fb\.com)$/i.test(host)) return 'Facebook';
+    if(/(^|\.)google\.(com|[a-z]{2,3})(\.[a-z]{2})?$/i.test(host)) return 'Google';
+    return '';
+  }
+  // " (via Instagram)" appended to the WhatsApp greeting, parentheses encoded.
+  function viaSuffix(source){
+    return encodeURIComponent(' (via ' + source + ')').replace(/\(/g, '%28').replace(/\)/g, '%29');
+  }
+
+  // The static link above stays as the no-JavaScript fallback (and is what the
+  // vault's link checker reads). With JavaScript, the greeting also says the source.
+  var link = document.getElementById('wa');
+  var source = turtleSource();
+  if(source) link.href += viaSuffix(source);
+  location.replace(link.href);
+})();
 </script>
 </body>
 </html>

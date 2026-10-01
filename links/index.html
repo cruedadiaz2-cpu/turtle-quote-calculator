@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Turtle Cleaning Services</title>
-<meta name="description" content="Home and small business cleaning in North NJ and New York City. Message us on WhatsApp or get an instant estimate.">
+<meta name="description" content="Home and small business cleaning in New Jersey and New York. Message us on WhatsApp or get an instant estimate.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap">
@@ -130,7 +130,7 @@
 
     <div>
       <h1>Turtle Cleaning Services</h1>
-      <div class="place">North NJ &amp; New York City</div>
+      <div class="place">New Jersey &amp; New York</div>
     </div>
 
     <span class="tagline">
@@ -156,10 +156,43 @@
       <li>Homes &amp; small offices</li>
       <li>Since 2023</li>
       <li>Weekend appointments</li>
-      <li>The owner is on every job</li>
     </ul>
 
-    <footer>Turtle Cleaning Services LLC · Locally owned, based in Union County, NJ</footer>
+    <footer>Turtle Cleaning Services LLC · Locally owned in New Jersey</footer>
   </main>
+<script>
+(function(){
+  // Where did this visitor come from? Every request should name its source.
+  // 1) an explicit ?src= (known values only, so a crafted link cannot inject text),
+  // 2) the Instagram or Facebook in-app browser, 3) the referrer.
+  function turtleSource(){
+    var KNOWN = { instagram:'Instagram', ig:'Instagram', facebook:'Facebook', fb:'Facebook', google:'Google' };
+    var m = /[?&]src=([^&#]*)/.exec(location.search);
+    var p = '';
+    try { p = m ? decodeURIComponent(m[1]).toLowerCase() : ''; } catch(e){}
+    if(KNOWN.hasOwnProperty(p)) return KNOWN[p];
+    var ua = navigator.userAgent || '';
+    if(/Instagram/i.test(ua)) return 'Instagram';
+    if(/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua)) return 'Facebook';
+    var host = '';
+    try { host = new URL(document.referrer).hostname; } catch(e){}
+    if(/(^|\.)instagram\.com$/i.test(host)) return 'Instagram';
+    if(/(^|\.)(facebook\.com|fb\.me|fb\.com)$/i.test(host)) return 'Facebook';
+    if(/(^|\.)google\.(com|[a-z]{2,3})(\.[a-z]{2})?$/i.test(host)) return 'Google';
+    return '';
+  }
+  // " (via Instagram)" appended to the WhatsApp greeting, parentheses encoded.
+  function viaSuffix(source){
+    return encodeURIComponent(' (via ' + source + ')').replace(/\(/g, '%28').replace(/\)/g, '%29');
+  }
+
+  var source = turtleSource();
+  if(!source) return;
+  var wa = document.querySelector('a.btn-wa');
+  if(wa) wa.href += viaSuffix(source);
+  var quote = document.querySelector('a.btn-quote');
+  if(quote) quote.href = '../?src=' + source.toLowerCase();
+})();
+</script>
 </body>
 </html>

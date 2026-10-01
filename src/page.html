@@ -287,7 +287,7 @@
     <div class="brandrow">
       <img class="mark mark-color" src="turtle-mark-color.png" width="48" height="71" alt="Turtle Cleaning Services">
       <img class="mark mark-white" src="turtle-mark-white.png" width="48" height="71" alt="" aria-hidden="true">
-      <div class="wordmark">Turtle Cleaning Services<span>North NJ &amp; New York City</span></div>
+      <div class="wordmark">Turtle Cleaning Services<span>New Jersey &amp; New York</span></div>
     </div>
 
     <h1 class="title">Request your cleaning quote</h1>
@@ -297,9 +297,8 @@
       We don't cut corners.
     </span>
     <ul class="meta-row">
-      <li>Locally owned · Based in Union County, NJ</li>
+      <li>Locally owned · Based in New Jersey</li>
       <li>Since 2023</li>
-      <li>The owner is on every job</li>
       <li>Weekend appointments</li>
       <li>(908) 880-5716</li>
     </ul>
@@ -466,7 +465,7 @@
           <label class="flabel">Preferred day</label>
         </div>
         <div class="pillgroup" style="padding-left:0;" role="radiogroup" aria-label="Preferred day" id="dayGroup"><!-- JS --></div>
-        <p class="inline-note" style="padding-left:0;">We're based in Union County, NJ and currently run Saturdays and Sundays across North &amp; Central New Jersey and New York City. Tell us your town or borough and we'll confirm we can get to you.</p>
+        <p class="inline-note" style="padding-left:0;">We're based in New Jersey and currently run Saturdays and Sundays across New Jersey and New York. Tell us your town or borough and we'll confirm we can get to you.</p>
       </section>
 
     </div>
@@ -507,7 +506,7 @@
   </main>
 
   <footer class="page-footer">
-    <span>Turtle Cleaning Services LLC · Locally owned, based in Union County, NJ · Serving North NJ &amp; NYC · Since 2023</span>
+    <span>Turtle Cleaning Services LLC · Locally owned, based in New Jersey · Serving New Jersey &amp; New York · Since 2023</span>
     <span>We quote every job individually, based on the size and condition of the space.</span>
   </footer>
 </div>
@@ -766,6 +765,27 @@
       .replace(/[\u00A0\u2007\u202F]/g, ' ');
   }
 
+  // Where did this visitor come from? Every request should name its source.
+  // 1) an explicit ?src= (known values only, so a crafted link cannot inject text),
+  // 2) the Instagram or Facebook in-app browser, 3) the referrer.
+  function turtleSource(){
+    var KNOWN = { instagram:'Instagram', ig:'Instagram', facebook:'Facebook', fb:'Facebook', google:'Google' };
+    var m = /[?&]src=([^&#]*)/.exec(location.search);
+    var p = '';
+    try { p = m ? decodeURIComponent(m[1]).toLowerCase() : ''; } catch(e){}
+    if(KNOWN.hasOwnProperty(p)) return KNOWN[p];
+    var ua = navigator.userAgent || '';
+    if(/Instagram/i.test(ua)) return 'Instagram';
+    if(/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua)) return 'Facebook';
+    var host = '';
+    try { host = new URL(document.referrer).hostname; } catch(e){}
+    if(/(^|\.)instagram\.com$/i.test(host)) return 'Instagram';
+    if(/(^|\.)(facebook\.com|fb\.me|fb\.com)$/i.test(host)) return 'Facebook';
+    if(/(^|\.)google\.(com|[a-z]{2,3})(\.[a-z]{2})?$/i.test(host)) return 'Google';
+    return '';
+  }
+  const SOURCE = turtleSource();
+
   function buildPlainTextSummary(){
     const svc = currentServiceType();
     const name = document.getElementById('cName').value.trim();
@@ -827,6 +847,7 @@
     if(avoid) lines.push('Off-limits: ' + avoid);
     const other = document.getElementById('otherNote').value.trim();
     if(other) lines.push('Other notes: ' + other);
+    if(SOURCE){ lines.push(''); lines.push('Source: ' + SOURCE); }
     return plainAscii(lines.join('\n'));
   }
 
