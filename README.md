@@ -5,17 +5,26 @@ Link-in-bio page (for Instagram / Facebook): `/links/`
 
 ## How it works
 
-The form runs entirely in the visitor's browser — there is no server and no
-database. When someone finishes it, they send the summary themselves through one
-of three routes, and it lands in `managturtlecs@gmail.com` or on WhatsApp:
+The page itself has no server. Since Oct 10, 2026 the main button, **Send my request**,
+and the **Call me back** box at the top POST the request to a Google Apps Script web app
+owned by `managturtlecs@gmail.com` ("Turtle - Quote Form Receiver"). It appends one row
+to the "Turtle — Quote Requests" sheet (Channel "Web form (<source>)", Source ID
+`web:<id>`) and emails an alert whose subject starts "Turtle lead", so the daily
+`turtle-sync-cotizaciones` task does not copy it a second time. The receiver's code
+lives in the vault: `💼 Business/Turtle Cleaning Services LLC/Apps Script - Quote Form Receiver.gs`.
+
+If the POST fails, the page opens the older routes, which hand the summary to another
+app where the visitor still has to press send:
 
 - **Send by WhatsApp** → `wa.me` link to (908) 880-5716
 - **Send by email** → the device's mail app (`mailto:`)
 - **Open Gmail instead** → Gmail web compose, for devices with no mail app
 
-Three routes because none of them works for everyone: `mailto:` needs a mail app
-registered on the device, and Gmail web needs an active Google session. Each is
-length-checked on its own, and **Copy details** is the fallback that always works.
+Why the change: from the Facebook and Instagram in-app browser almost nobody finished
+those hand-offs (11 ad visits on Oct 8-9, 0 requests).
+
+A banner with the 5% first-cleaning offer shows until the end of Oct 15, 2026 (New York)
+and hides itself after that.
 
 Every request names where the visitor came from. The form adds a `Source:` line and the
 WhatsApp buttons on `/links/` and `/chat/` add `(via Instagram)`, `(via Facebook)` or
