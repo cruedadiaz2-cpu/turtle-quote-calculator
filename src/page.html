@@ -331,11 +331,7 @@
     </div>
 
     <h1 class="title">Request your cleaning quote</h1>
-    <div class="offer-banner" id="offerBanner" hidden>
-      <strong>5% off your first cleaning</strong>
-      For new clients in Midtown Manhattan and in Union, Essex, Hudson, Bergen and Middlesex counties and Morristown, NJ. Request by October 15.
-      <span class="terms">New clients only. It applies to the first cleaning.</span>
-    </div>
+    <div class="offer-banner" id="offerBanner" hidden></div>
 
     <p class="lede">Tell us about your home (or your business) and how you like things done. Send it over and we'll come back with your quote, usually within one business day.</p>
     <form class="quick" id="quickForm" novalidate>
@@ -577,6 +573,7 @@
   <footer class="page-footer">
     <span>Turtle Cleaning Services LLC · Locally owned, based in New Jersey · Serving New Jersey &amp; New York · Since 2023</span>
     <span>We quote every job individually, based on the size and condition of the space.</span>
+    <span id="pixelNotice" hidden>This page uses the Meta pixel to measure our ads. <a href="privacy/">Privacy and your ad choices</a></span>
   </footer>
 </div>
 
@@ -1006,10 +1003,55 @@
   // writes the row in the Quote Requests sheet and emails an alert.
   const RECEIVER_URL = 'https://script.google.com/macros/s/AKfycbwIOwPr6tvpMOzYWX3QrXRVEMNsHLBGa7jjpF4Kt3YxrJ0bHEAjkfFTEQwoc5jTzPBb/exec';
 
-  // The ad's offer: shown until the end of Oct 15, 2026 (New York), then gone.
-  const OFFER_ENDS = Date.parse('2026-10-16T00:00:00-04:00');
-  const offerLive = Date.now() < OFFER_ENDS;
-  document.getElementById('offerBanner').hidden = !offerLive;
+  // The ads' offers, by date (New York). The banner and the note on every request follow
+  // the clock, so this page can go live before one offer ends and the next one starts.
+  const OFFERS = [
+    { until: Date.parse('2026-10-16T00:00:00-04:00'),
+      title: '5% off your first cleaning',
+      text: 'For new clients in Midtown Manhattan and in Union, Essex, Hudson, Bergen and Middlesex counties and Morristown, NJ. Request by October 15.',
+      terms: 'New clients only. It applies to the first cleaning.',
+      note: 'Offer live when sent: 5% off first cleaning (until Oct 15)' },
+    { until: Date.parse('2026-11-01T00:00:00-04:00'),
+      title: 'Free oven + fridge cleaning with your first cleaning',
+      text: 'We clean the inside of your oven and your fridge at no extra charge with your first cleaning. Request your quote by October 31.',
+      terms: 'New clients only. One per home. It applies to the first cleaning.',
+      note: 'Offer live when sent: free oven + fridge cleaning with the first cleaning (until Oct 31)' }
+  ];
+  const liveOffer = OFFERS.find(function(o){ return Date.now() < o.until; }) || null;
+  const offerLive = !!liveOffer;
+  (function(){
+    const box = document.getElementById('offerBanner');
+    box.hidden = !offerLive;
+    if(!offerLive) return;
+    const strong = document.createElement('strong');
+    strong.textContent = liveOffer.title;
+    const terms = document.createElement('span');
+    terms.className = 'terms';
+    terms.textContent = liveOffer.terms;
+    box.append(strong, document.createTextNode(liveOffer.text), terms);
+  })();
+
+  // ---------- Meta pixel (prepared Oct 12, 2026) ----------
+  // Off while META_PIXEL_ID is empty. With an ID it reports two things to Meta: the page
+  // was opened (PageView) and a request was sent (Lead), so the ad can be optimized for
+  // requests and not for clicks. autoConfig is off so the pixel does not read buttons or
+  // form fields; nothing the visitor types is passed to it. Keep 'Automatic advanced
+  // matching' off in Events Manager, and keep the notice and privacy/ in step with this.
+  const META_PIXEL_ID = '';
+  if(META_PIXEL_ID){
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    window.fbq('set', 'autoConfig', false, META_PIXEL_ID);
+    window.fbq('init', META_PIXEL_ID);
+    window.fbq('track', 'PageView');
+    document.getElementById('pixelNotice').hidden = false;
+  }
+  function trackLead(kind){
+    if(META_PIXEL_ID && window.fbq) window.fbq('track', 'Lead', { content_name: kind });
+  }
 
   function postToReceiver(payload){
     return fetch(RECEIVER_URL, {
@@ -1052,7 +1094,7 @@
     if(prioOther) other.push('Extra care, other: ' + prioOther);
     const otherNote = document.getElementById('otherNote').value.trim();
     if(otherNote) other.push(otherNote);
-    if(offerLive) other.push('Offer live when sent: 5% off first cleaning (until Oct 15)');
+    if(offerLive) other.push(liveOffer.note);
     p.otherNotes = other.join(' | ');
     if(isBiz){
       const sqft = document.getElementById('bizSqft').value;
@@ -1091,6 +1133,7 @@
     btnSend.textContent = 'Sending...';
     postToReceiver(buildPayload()).then(function(){
       sent = true;
+      trackLead('Quote request');
       btnSend.hidden = true;
       sendStatus.textContent = '';
       document.getElementById('doneCard').hidden = false;
@@ -1119,10 +1162,11 @@
     postToReceiver({
       kind:'callback', website: document.getElementById('qWebsite').value, source: SOURCE,
       name: name, phone: phone, town: town,
-      otherNotes: offerLive ? 'Offer live when sent: 5% off first cleaning (until Oct 15)' : '',
+      otherNotes: offerLive ? liveOffer.note : '',
       summary: plainAscii('Call-back request\nName: ' + name + '\nPhone: ' + phone
         + (town ? '\nTown: ' + town : '') + (SOURCE ? '\nSource: ' + SOURCE : ''))
     }).then(function(){
+      trackLead('Call-back request');
       btn.hidden = true;
       status.className = 'send-status ok';
       status.textContent = "Thanks, " + name + "! We'll call or text you back, usually within one business day.";
