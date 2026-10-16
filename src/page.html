@@ -1012,10 +1012,10 @@
       terms: 'New clients only. It applies to the first cleaning.',
       note: 'Offer live when sent: 5% off first cleaning (until Oct 15)' },
     { until: Date.parse('2026-11-01T00:00:00-04:00'),
-      title: 'Free oven + fridge cleaning with your first cleaning',
-      text: 'We clean the inside of your oven and your fridge at no extra charge with your first cleaning. Request your quote by October 31.',
+      title: 'Free oven or fridge cleaning with your first cleaning',
+      text: 'You pick one: we clean the inside of your oven or your fridge at no extra charge with your first cleaning. Request your quote by October 31.',
       terms: 'New clients only. One per home. It applies to the first cleaning.',
-      note: 'Offer live when sent: free oven + fridge cleaning with the first cleaning (until Oct 31)' }
+      note: 'Offer live when sent: free oven or fridge cleaning, client picks one, with the first cleaning (until Oct 31)' }
   ];
   const liveOffer = OFFERS.find(function(o){ return Date.now() < o.until; }) || null;
   const offerLive = !!liveOffer;
